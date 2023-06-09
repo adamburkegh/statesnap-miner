@@ -1,0 +1,6 @@
+personid,yearStart,yearEnd,job,salary
+1,1801,1804,Student,20
+1,1805,1805,Drone,100
+2,1801,1804,Student,20
+2,1802,1804,Tutor,30
+2,1805,1807,Bludger,10

@@ -1,0 +1,9 @@
+var/
+Include/
+Lib/
+Scripts/
+__pycache__/
+share/
+pyvenv.cfg
+*.swp
+*.avi
