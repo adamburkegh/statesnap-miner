@@ -30,8 +30,13 @@ Output model to test_ssnap1.png.
 
 Scripts for working with CGED-Q data are in the `cgedq` package. There are two steps.
 
-[conv.py](cgedq/conv.py) converts CSV or Stata extracts into CSV files in state snapshot log form. Multiple files are produced according to different slices of the data. A 
+[conv.py](cgedq/conv.py) converts CSV or Stata extracts into CSV files in state snapshot log form. Multiple files are produced according to different slices of the data. Check help for extra options.
+
+`python -m cgedq.conv <datafile>`
+
 
 [mine.py](cgedq/mine.py) takes snapshot CSV files, performs further filtering, runs the state snapshot miner on them, producing PNG output. Output can be varied to eg PNML or PDF by changing the script. 
+
+`python -m cgedq.mine`
 
 As the full set of CGED-Q data is not in public release, it is not included in this project. Do note that an extract covering  1900-1911 is publicly available.
