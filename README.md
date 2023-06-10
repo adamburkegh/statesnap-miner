@@ -4,6 +4,8 @@ The State Snapshot Miner for constructing Petri net models from activity trace l
 
 ## Running
 
+Requires Python 3.11 or later.
+
 ### Installing
 
 Clone the repo and create a virtual environment of your choice.
