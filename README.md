@@ -1,6 +1,6 @@
 # statesnap-miner
 
-The State Snapshot Miner for constructing Petri net models from activity trace logs. This has been applied to data from the [CGED-Q](https://shss.hkust.edu.hk/lee-campbell-group/projects/china-government-employee-database-qing-cged-q/), a digital version of Qing civil service records. A paper on this research is forthcoming.
+The State Snapshot Miner, that constructs Petri net models from activity trace logs. This has been applied to data from the [CGED-Q](https://shss.hkust.edu.hk/lee-campbell-group/projects/china-government-employee-database-qing-cged-q/), a digital version of Qing civil service records. A paper on this research is forthcoming.
 
 ## Running
 
@@ -14,7 +14,7 @@ Install dependencies with
 
 `pip install -r requirements.txt`
 
-Visualisation depends on [Graphviz](https://graphviz.org/) being installed and on the PATH.
+Visualisation depends on [Graphviz](https://graphviz.org/) being installed and on the PATH, specifically the `dot` executable.
 
 ### Running the example
 The example script, [snapeg.py](snapeg.py), uses a toy CSV log from the unit tests, and outputs a model diagram.
@@ -40,7 +40,7 @@ These two scripts form a (simple) data pipeline and there is much in them specif
 
 ### Convert
 
-[conv.py](cgedq/conv.py) converts CSV or Stata extracts into CSV files in state snapshot log form. Multiple files are produced according to different slices of the data. Check help for extra options.
+[conv.py](cgedq/conv.py) converts CSV or Stata extracts into CSV files in state snapshot log form. Multiple files are produced according to different slices of the data. Role conflation of less frequent roles also happens here. Check help for extra options.
 
 `python -m cgedq.conv <datafile>`
 
@@ -55,11 +55,34 @@ Some example extracts of the [CGED-Q public data release 1850-1864](https://shss
 
 `python -m cgedq.mine`
 
+This produces several output models covering different subsets and durations. 
+
+[Top candidate (状元) first three years - English](images/cged-q-zyjtnalleng_n0000_ss003y_pn.png)
+
+[Top candidate (状元) first three years - Chinese](images/cged-q-zyjtnall_n0000_ss003y_pn.png)
 
 
-As the full set of CGED-Q data is not in public release, it is not included in this project. Do note that an extract covering  1900-1911 is publicly available.
+
 
 ### Public Extracts Included
 
+As the full set of CGED-Q data is not in public release, it is not included in this project. Do note that there are public releases of extracts covering 1850-1864 and 1900-1911.
 
-These include only a subset of the attributes available in the CGED-Q, and include some basic data normalisation that suited this project, such as standardising hanzi character variants. 
+Subsets of the 1850-1864 are in the `data` directory. These extracts include only a subset of the attributes available in the CGED-Q, and include some basic data normalisation that suited this project, such as standardising hanzi character variants and including only officials with surnames (which excludes most Manchu and Mongolians). The exact code used for the extract is in `process_public_extract()` function in [conv.py](https://github.com/adamburkegh/statesnap-miner/blob/3ed73066b57c4b2399d1076951a6867bbb268aa6/cgedq/conv.py#L600).
+
+
+ * `cged-q-allclean_1850-1864.csv` - All records
+ * `cged-q-jinshi_1850-1864.csv` - Jinshi officials
+ * `cged-q-t1jtall_1850-1864.csv` - Exam Tier 1 placed officials
+ * `cged-q-t2jtall_1850-1864.csv` - Exam Tier 2 placed officials
+ * `roletrans.csv` - Small Chinese-English dictionary for role names
+ * `tml_1850-1864.csv` - Timinglu exam records with CGED-Q `person_id`, primarily for exam tier
+
+If using the data beyond preliminary investigatory work, please do reach out to the experts at the Lee-Campbell group, and of course cite their work. 
+
+### References
+
+Chen, B., Campbell, C., Ren, Y., & Lee, J. (2020). Big Data for the Study of Qing Officialdom: The China Government Employee Database-Qing (CGED-Q). Journal of Chinese History, 4(2), 431–460. https://doi.org/10.1017/jch.2020.15
+
+Campbell, C. D., Chen, B., Ren, Y., & Lee, J. (2022). China Government Employee Database-Qing (CGED-Q) Jinshenlu Public Release [Data set]. DataSpace@HKUST. https://doi.org/10.14711/dataset/E9GKRS
+
