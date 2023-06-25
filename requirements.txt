@@ -1,4 +1,4 @@
 numpy >= 1.19.1
 pandas >= 1.5.3
 pm4py >= 2.5.0
-sqlalchemy >= 1.4
+sqlalchemy >= 1.4, < 2.0

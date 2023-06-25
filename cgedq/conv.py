@@ -584,7 +584,6 @@ def process(fin,rebuild_db,tmlin,inputtype,datadir):
     if inputtype == 'clean':
         cq = process_clean_cgedq(fin)
     events = filter_basic(cq)
-
     (officials,positions,appointments) = normalize_events(events,trans)
     if rebuild_db:
         # Refers to rebuilding the originating record tables
@@ -597,6 +596,36 @@ def process(fin,rebuild_db,tmlin,inputtype,datadir):
         export_tml_variants(events,tmlrec,officials,positions,appointments,
                             trans)
     info(f"Finished at {datetime.now()}")
+
+def process_public_extract():
+    '''
+    Cut-down version of process() to produce the extract of public data year 
+    ranges.
+    '''
+    global DATA_DIR 
+    DATA_DIR = 'data'
+    fin = 'cged-q-ab-20220303.dta'
+    tmlin = 'cged-q-ab-jsl-tml-20221012.dta'
+    trans = loadtransfile()
+    tmlrec = process_raw_tml(tmlin)
+    cq = process_raw_cgedq(fin)
+    events = filter_basic(cq)
+    startyear = 1850
+    public_mask1 = events.year.between(startyear,1864)
+    # public_mask2 = events.year.between(1900,1910)
+    events1 = events.query('@public_mask1').copy()
+    # events2 = events.query('@public_mask2').copy()
+    (officials,positions,appointments) = normalize_events(events1,trans)
+    recreate_event_db(officials,positions,appointments) 
+    export_variants(events1,officials,positions,appointments,trans)
+    export_tml_variants(events,tmlrec,officials,positions,appointments,trans)
+    tml_public_mask1 = tmlrec.year.between(startyear,1864)
+    tmloutf = join('var',f'tml-{startyear}-public.csv')
+    tmlrecp = tmlrec.query('@tml_public_mask1').copy()
+    tmlrecp.to_csv(tmloutf, encoding=denc,index=False)
+    info(f"Exported {len(tmlrecp)} TML records to {tmloutf}.")
+    info(f"Finished public extract at {datetime.now()}")
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -613,6 +642,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+    # process_public_extract()
 
 
 

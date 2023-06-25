@@ -206,7 +206,7 @@ def mineJobStatesFullOnly(vard,fid):
 
 
 
-if __name__ == '__main__':
+def main():
     # mineByRegion('var')
     # mineRegionTransitions('var')
     if len(sys.argv) > 1:
@@ -244,5 +244,10 @@ if __name__ == '__main__':
     # mineJobStatesFullOnly('var','zypurple')
     # mineJobStatesFullOnly('var','178610052600')
     info("Done")
+
+
+
+if __name__ == '__main__':
+    main()
 
 
