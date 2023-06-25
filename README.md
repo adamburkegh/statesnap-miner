@@ -61,8 +61,9 @@ This produces several output models covering different subsets and durations.
 
 [Top candidate (状元) first three years - Chinese](images/cged-q-zyjtnall_n0000_ss003y_pn.png)
 
+### Appointment Database
 
-
+To help explore the data with standard SQL tools, a SQLLite database called `appoint.db` is built in the home directory when `conv.py` runs. 
 
 ### Public Extracts Included
 
