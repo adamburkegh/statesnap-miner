@@ -82,6 +82,7 @@ Subsets of the 1850-1864 are in the `data` directory. These extracts include onl
 If using the data beyond preliminary investigatory work, please do reach out to the experts at the Lee-Campbell group, and of course cite their work. 
 
 ### References
+Burke, A., Leemans, S.J.J, Wynn, M.T., and Campbell, C.D. (2023). State Snapshot Process Discovery on Career Paths of Qing Dynasty Civil Servants. ICPM2023.
 
 Chen, B., Campbell, C., Ren, Y., & Lee, J. (2020). Big Data for the Study of Qing Officialdom: The China Government Employee Database-Qing (CGED-Q). Journal of Chinese History, 4(2), 431–460. https://doi.org/10.1017/jch.2020.15
 
