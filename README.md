@@ -69,7 +69,7 @@ To help explore the data with standard SQL tools, a SQLLite database called `app
 
 As the full set of CGED-Q data is not in public release, it is not included in this project. Do note that there are [public releases of extracts](https://doi.org/10.14711/dataset/E9GKRS) covering 1850-1864 and 1900-1911.
 
-Subsets of the 1850-1864 are in the `data` directory. These extracts include only a subset of the attributes available in the CGED-Q, and include some basic data normalisation that suited this project, such as standardising hanzi character variants and including only officials with surnames (which excludes most Manchu and Mongolians). The exact code used for the extract is in `process_public_extract()` function in [conv.py](https://github.com/adamburkegh/statesnap-miner/blob/3ed73066b57c4b2399d1076951a6867bbb268aa6/cgedq/conv.py#L600).
+Records for 1850-1864 are in the `data` directory. These extracts include only a subset of the attributes available in the CGED-Q, and include some basic data normalisation that suited this project, such as standardising hanzi character variants and including only officials with surnames (which excludes most Manchu and Mongolians). The exact code used for the extract is in `process_public_extract()` function in [conv.py](https://github.com/adamburkegh/statesnap-miner/blob/3ed73066b57c4b2399d1076951a6867bbb268aa6/cgedq/conv.py#L600).
 
 
  * `cged-q-allclean_1850-1864.csv` - All records
