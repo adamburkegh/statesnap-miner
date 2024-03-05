@@ -17,9 +17,9 @@ from pm4py.objects.log.exporter.xes import exporter as xes_exporter
 
 from cgedq.logutil import *
 
-from pmmodels.petrinet import exportToDOT
+from pmkoalas.models.petrinet import LabelledPetriNet
 from pmmodels.pnformatter import ScaledFormatter, exportNetToScaledImage
-from pmmodels.dotutil import dotToImg, exportDOTToImage
+from pmkoalas.models.dotutil import dot_to_img, export_DOT_to_image
 import pmmodels.pm4pyviz
 from ssnap.ssnap import mine, sslogFromCSV, sslogWithRanges, reportLogStats
 
@@ -53,10 +53,10 @@ def exportTreeToImage(ptree,bdir,fname):
     imgbpmnf = os.path.join(bdir,fname+'_bpmn.png')
     ptml_exporter.apply(ptree, ptreef)
     pm4py.write_pnml(net,initial,final,netf)
-    # dotToImg(dot,dotf,imgpnf)
+    # dot_to_img(dot,dotf,imgpnf)
     bpmndot = pmmodels.pm4pyviz.bpmnToDOT(bpmn,font='SimSun')
-    dotToImg(bpmndot,dotf,imgbpmnf)
-    dotToImg(dot,dotf,imgpnf)
+    dot_to_img(bpmndot,dotf,imgbpmnf)
+    dot_to_img(dot,dotf,imgpnf)
 
 
 
@@ -145,7 +145,7 @@ def filterByTimeOnDate(sslog:set, years: int ) -> set:
 
 def exportNetToImage(vard,oname,pn):
     dotStr = exportToDOT(pn)
-    exportDOTToImage(vard,oname,dotStr)
+    export_DOT_to_image(vard,oname,dotStr)
 
 def mineByTime(vard,fname,sslog:set,years:int,noise=0.0,font=None):
     sslogn = filterByTimeOnInt(sslog, years)
@@ -246,6 +246,12 @@ def main():
     info("Done")
 
 
+#
+# TODO Push up into koalas models/petrinet
+#
+
+def exportToDOT(net:LabelledPetriNet) -> str:
+    return convert_net_to_dot(PetriNetDOTFormatter(net))
 
 if __name__ == '__main__':
     main()

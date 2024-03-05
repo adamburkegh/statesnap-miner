@@ -6,8 +6,8 @@ import unittest
 from ssnap.ssnap import (StateSnapshot, sslogFromCSV, sslogWithRanges, 
                          pruneForNoise, arcsSpanningTran)
 import ssnap.ssnap
-from pmmodels.petrinet import *
-from pmmodels.pnfrag import *
+from pmkoalas.models.petrinet import *
+from pmkoalas.models.pnfrag import *
 import logging
 from logging import debug, info
 from tests import ssnap as tssnap
@@ -37,13 +37,13 @@ def recodePlaces(netToChange,referenceNet):
     newArcs = set()
     for arc in netToChange.arcs:
         newArc = arc
-        if isinstance(arc.fromNode,Place) and arc.fromNode.name in newPlaces:
-            newPlace = newPlaces[arc.fromNode.name]
-            newArc = Arc(newPlace,arc.toNode)
+        if isinstance(arc.from_node,Place) and arc.from_node.name in newPlaces:
+            newPlace = newPlaces[arc.from_node.name]
+            newArc = Arc(newPlace,arc.to_node)
             debug(f"recoding {arc} to {newArc}")
-        if isinstance(arc.toNode,Place) and arc.toNode.name in newPlaces:
-            newPlace = newPlaces[arc.toNode.name]
-            newArc = Arc(arc.fromNode,newPlace)
+        if isinstance(arc.to_node,Place) and arc.to_node.name in newPlaces:
+            newPlace = newPlaces[arc.to_node.name]
+            newArc = Arc(arc.from_node,newPlace)
             debug(f"recoding {arc} to {newArc}")
         newArcs.add(newArc)
     netToChange._arcs = newArcs
@@ -58,10 +58,10 @@ class StateSnapshotMinerTest(unittest.TestCase):
         lb = "ssmtest"
         if label:
             lb = label
-        return self.parser.createNet(lb,netText)
+        return self.parser.create_net(lb,netText)
 
     def add(self,net,netText):
-        return self.parser.addToNet(net,netText)
+        return self.parser.add_to_net(net,netText)
 
     def assertNetEqual(self,net1,net2):
         self.assertEqual(net1,net2,verbosecmp(net1,net2))
@@ -291,7 +291,7 @@ class StateSnapshotMinerTest(unittest.TestCase):
         sweepP   = Place("Sweep",2)
         atop = {"Student": studentP, "Sweep": sweepP }
         # tran = Transition(1)
-        tran = silentTransition(1)
+        tran = silent_transition(1)
         arcExp = set([Arc(studentP,tran),Arc(tran,sweepP)])
         result = arcsSpanningTran( set(["Student"]), tran, set(["Sweep"]),atop )
         self.assertTrue( Arc(studentP,tran) in result )
@@ -303,9 +303,9 @@ class StateSnapshotMinerTest(unittest.TestCase):
 
 def arcdebug(net1,net2):
     sitems1 = sorted(net1.arcs, 
-                     key=lambda arc: (arc.fromNode.name,arc.toNode.name ) ) 
+                     key=lambda arc: (arc.from_node.name,arc.to_node.name ) ) 
     sitems2 = sorted(net2.arcs, 
-                     key=lambda arc: (arc.fromNode.name,arc.toNode.name ) ) 
+                     key=lambda arc: (arc.from_node.name,arc.to_node.name ) ) 
     sz = zip_longest(sitems1,sitems2,fillvalue="") 
     for (s1,s2) in sz:
         debug(f"{s1}\t{s2}\t{s1 == s2}")

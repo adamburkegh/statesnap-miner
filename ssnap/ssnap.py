@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from typing import Any
 from operator import attrgetter
 
-from pmmodels.petrinet import *
+from pmkoalas.models.petrinet import *
 from logging import debug, info
 
 
@@ -58,7 +58,7 @@ def addTransition(fromPlaces,toPlaces,tranId,atot,tweights) -> Transition:
         tweights[tran] = tweights[tran] + 1 
     else:
         tranId += 1
-        tran = silentTransition(tid = tranId)
+        tran = silent_transition(tid = tranId)
         atot[(fromPlaces,toPlaces)] = tran
         tweights[tran] = 1
     return tran
@@ -140,7 +140,7 @@ def minePure(sslog: dict,label=None,final=True) -> LabelledPetriNet:
         tran.weight = tweights[tran]
         transitions.add(tran)
     return LabelledPetriNet( places = places, transitions = transitions, 
-                             arcs = arcs, label=label )
+                             arcs = arcs, name=label )
 
 def pruneForNoise(pnet,noiseThreshold):
     tsum = 0
@@ -151,8 +151,8 @@ def pruneForNoise(pnet,noiseThreshold):
     keeptrans = set([tran for tran in pnet.transitions \
                         if tran.weight > weightThreshold])
     keeparcs = [arc for arc in pnet.arcs \
-                        if arc.fromNode in keeptrans or arc.toNode in keeptrans]
-    result = LabelledPetriNet(pnet.places,keeptrans,keeparcs,pnet.label)
+                    if arc.from_node in keeptrans or arc.to_node in keeptrans]
+    result = LabelledPetriNet(pnet.places,keeptrans,keeparcs,pnet.name)
     return result
 
 def mine(sslog: dict, label=None, noiseThreshold=0.0, final=False) \
@@ -262,5 +262,6 @@ def reportLogStats(sslog: dict,logname: str = None):
     result += f"  Min / max #roles: {minRoles} / {maxRoles}\n"
     result += f"  # states: {states}"
     info(result)
+
 
 

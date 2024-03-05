@@ -1,7 +1,7 @@
 
 import math
-from pmmodels.petrinet import PetriNetDOTFormatter
-from pmmodels.dotutil import exportDOTToImage
+from pmkoalas.models.petrinet import PetriNetDOTFormatter
+from pmkoalas.models.dotutil import export_DOT_to_image
 
 
 class ScaledFormatter(PetriNetDOTFormatter):
@@ -71,12 +71,12 @@ class ScaledFormatter(PetriNetDOTFormatter):
 
 
 def exportToScaledDOT(net,sslog: set,font) -> str:
-    return ScaledFormatter(net,sslog,font).netToDOT()
+    return ScaledFormatter(net,sslog,font).transform_net()
 
 
 def exportNetToScaledImage(vard,oname,pn,sslog,font):
     dotStr = exportToScaledDOT(pn,sslog,font)
-    exportDOTToImage(vard,oname,dotStr) 
+    export_DOT_to_image(vard,oname,dotStr) 
 
 
 
