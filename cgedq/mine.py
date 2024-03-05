@@ -144,7 +144,7 @@ def filterByTimeOnDate(sslog:set, years: int ) -> set:
 
 
 def exportNetToImage(vard,oname,pn):
-    dotStr = exportToDOT(pn)
+    dotStr = convert_net_to_dot(pn)
     export_DOT_to_image(vard,oname,dotStr)
 
 def mineByTime(vard,fname,sslog:set,years:int,noise=0.0,font=None):
@@ -245,13 +245,6 @@ def main():
     # mineJobStatesFullOnly('var','178610052600')
     info("Done")
 
-
-#
-# TODO Push up into koalas models/petrinet
-#
-
-def exportToDOT(net:LabelledPetriNet) -> str:
-    return convert_net_to_dot(PetriNetDOTFormatter(net))
 
 if __name__ == '__main__':
     main()
