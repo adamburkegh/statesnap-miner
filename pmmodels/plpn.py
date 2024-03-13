@@ -80,3 +80,40 @@ class PetriNetSemantics:
     def marking(self):
         return self._mark
 
+
+
+
+
+
+class PLPNSemantics(PetriNetSemantics):
+    """
+    Firing rules for PLPN including capacity.
+    """
+    def __init__(self, marking: Marking) -> None:
+        super().__init__(marking)
+
+
+    def enabled(self) -> Set[Transition]:
+        """
+        returns the set of transitions that are enabled at this marking.
+        """
+        ret = set()
+        for trans in self._net.transitions:
+            enabled = True
+            for inp in self._incoming[trans]:
+                enabled = enabled \
+                        and inp in self._mark.mark \
+                        and self._mark.mark[inp] > 0
+            if not enabled:
+                next
+            for outp in self._outgoing[trans]:
+                enabled = enabled \
+                        and (not outp in self._mark.mark \
+                             or outp in self._incoming[trans])
+            if (enabled):
+                ret.add(trans)
+        return ret
+
+
+
+
