@@ -1,26 +1,6 @@
 import unittest
 
-from pmkoalas.models.pnfrag import *
 from pmmodels.plpn import *
-
-
-def findPlace(net,label):
-    """
-    Return first node with this label
-    """
-    for place in net._places:
-        if label == place.name:
-            return place
-
-
-def findTran(net,label):
-    """
-    Return first node with this label
-    """
-    for tran in net._transitions:
-        if label == tran.name:
-            return tran
-
 
 
 

@@ -42,6 +42,14 @@ class PetriNetSemantics:
             self._incoming[trans] = [ arc.from_node for arc in incoming ]
             self._outgoing[trans] = [ arc.to_node for arc in outgoing ]
 
+    @property
+    def mark(self):
+        return self._mark
+
+    @mark.setter
+    def mark(self, value: Marking):
+        self._mark = value
+
     def enabled(self) -> Set[Transition]:
         """
         returns the set of transitions that are enabled at this marking.
@@ -62,7 +70,7 @@ class PetriNetSemantics:
         the given transition.
         """
         if firing not in self.enabled():
-            raise ValueError("Given transition cannot fire from this marking.")
+            raise ValueError(f"Transition {firing} cannot fire from marking {self._mark.mark}.")
         next_mark = deepcopy(self._mark.mark)
         for incoming in self._incoming[firing]:
             next_mark[incoming] = next_mark[incoming] - 1
