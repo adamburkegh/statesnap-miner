@@ -1,3 +1,5 @@
+
+import tempfile
 import unittest
 
 from pmkoalas.models.pnfrag import *
@@ -116,7 +118,8 @@ class  WeightedTokenGameStateLogGeneratorTest(unittest.TestCase):
         pi = findPlace(net,"I")
         imark = singleton_marking(net, [pi])
         sem = PLPNSemantics(imark)
-        gen = WeightedTokenGameStateLogGenerator(sem,log_size=12,max_trace_length=5)
+        gen = WeightedTokenGameStateLogGenerator(sem,log_size=12,
+                                                 max_trace_length=5)
         lg = gen.generate()
         expected = { ( ss(["I"]), ss(["A"]), ss(["F"]) ) : 2,
                      ( ss(["I"]), ss(["A"]), ss(["A"]), ss(["F"]) ) : 2 ,
@@ -139,6 +142,20 @@ class BagTest(unittest.TestCase):
     def test_bag_union_with_intersect(self):
         self.assertEqual({'a': 3, 'b': 2}, 
                 bag_union( {'a': 1}, {'a': 2, 'b': 2} )  )
+
+
+
+
+class ExportTest(unittest.TestCase):
+    def test_export_simple_log(self):
+        log = LightStateLog( { ( ss(["I"]), ss(["F"]) ) : 4,
+                               ( ss(["I"]), ss(["A","B"]), ss(["F"]) ) : 5  } )
+        with tempfile.NamedTemporaryFile(delete=False) as tf:
+            export_simple_log_to_csv(log,tf.name)
+            # print('-----')
+            # with open(tf.name, 'r') as fin:
+            #    print(fin.read())
+        # note contents aren't checked automatically
 
 
 

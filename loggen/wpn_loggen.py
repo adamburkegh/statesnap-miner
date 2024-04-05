@@ -2,13 +2,46 @@
 Log generators on stochastic models.
 '''
 
+import csv
 from dataclasses import dataclass
+import datetime
 from logging import *
 import math
 
 from ssnap.ssnap import StateSnapshot
 from pmmodels.plpn import *
 
+
+class LightStateLog:
+    def __init__(self, dictlog: dict):
+        self.dictlog = dictlog
+
+    def as_dict(self) -> dict:
+        return self.dictlog
+
+CASEID = 'caseid'
+DATE   = 'date'
+ROLE   = 'role'
+
+def export_simple_log_to_csv(log: LightStateLog, csvfilename, 
+                             start_date = None):
+    if not start_date:
+        start_date = datetime.date.today() - datetime.timedelta(days=1000)
+    with open(csvfilename,'w') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames= [CASEID, DATE, ROLE] )
+        writer.writeheader()
+        ld = log.as_dict()
+        newid = 1
+        for key in ld:
+            freq = ld[key]
+            ctdate = start_date
+            for ctid in range(newid,newid+freq): 
+                for ssnap in key:
+                    for role in ssnap:
+                        writer.writerow({ CASEID: ctid, ROLE: role, 
+                                          DATE: ctdate.strftime('%Y%m%d') } )
+                    ctdate = ctdate + datetime.timedelta(days=1)
+            newid += freq    
 
 
 
@@ -22,7 +55,7 @@ class WeightedTokenGameStateLogGenerator:
         # blowing the Java call stack recursion limit
         self.max_trace_length = max_trace_length
 
-    def generate(self) -> set:
+    def generate(self) -> dict:
         ''' 
         Returns a light state log: a dict[tuple[set(str)]: int].
         The tuple[set(str)] are traces, the strings are role labels, and the 
@@ -32,7 +65,7 @@ class WeightedTokenGameStateLogGenerator:
         return self.generate_from_mark(self.semantics._mark,self.log_size,())
 
     def generate_from_mark(self,ct_mark: Marking,budget:int,
-                           parent_trace: tuple):
+                           parent_trace: tuple) -> dict:
         debug( f"gen_from_mark( {ct_mark.mark}, {budget}, {parent_trace} ) " )
         total_weight = 0
         allocated = 0
@@ -94,5 +127,6 @@ def bag_union( dict1: dict, dict2: dict ):
         if key not in result:
             result[key] = dict2[key]
     return result
+
 
 
