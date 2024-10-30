@@ -47,13 +47,14 @@ def export_simple_log_to_csv(log: LightStateLog, csvfilename,
 
 class WeightedTokenGameStateLogGenerator:
     def __init__(self, semantics: PetriNetSemantics, log_size: int, 
-                       max_trace_length: int = 100):
+                       max_trace_length: int = 100, warnings=True):
         self.semantics = semantics
         self.log_size = log_size
         # self.stack = []
         # Java implementation uses a local state stack to avoid 
         # blowing the Java call stack recursion limit
         self.max_trace_length = max_trace_length
+        self.warnings = warnings
 
     def generate(self) -> dict:
         ''' 
@@ -61,7 +62,7 @@ class WeightedTokenGameStateLogGenerator:
         The tuple[set(str)] are traces, the strings are role labels, and the 
         ints are trace counts.
         '''
-        self.have_warned = False
+        self.have_warned = not self.warnings
         return self.generate_from_mark(self.semantics._mark,self.log_size,())
 
     def generate_from_mark(self,ct_mark: Marking,budget:int,

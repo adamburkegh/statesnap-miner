@@ -119,7 +119,8 @@ class  WeightedTokenGameStateLogGeneratorTest(unittest.TestCase):
         imark = singleton_marking(net, [pi])
         sem = PLPNSemantics(imark)
         gen = WeightedTokenGameStateLogGenerator(sem,log_size=12,
-                                                 max_trace_length=5)
+                                                 max_trace_length=5,
+                                                 warnings=False)
         lg = gen.generate()
         expected = { ( ss(["I"]), ss(["A"]), ss(["F"]) ) : 2,
                      ( ss(["I"]), ss(["A"]), ss(["A"]), ss(["F"]) ) : 2 ,
