@@ -1,7 +1,9 @@
 
 import math
 from pmkoalas.models.petrinet import PetriNetDOTFormatter
-from pmkoalas.models.dotutil import export_DOT_to_image
+# from pmkoalas.models.dotutil import export_DOT_to_image
+## local cut and paste fork
+from pmmodels.dotutil import export_DOT_to_image
 
 
 class ScaledFormatter(PetriNetDOTFormatter):

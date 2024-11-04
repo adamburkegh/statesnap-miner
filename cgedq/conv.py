@@ -222,32 +222,35 @@ def process_raw_cgedq(fin):
 
     # xuhao 序号 is the person identifier within an edition
     # clean the seasonal marker rows without this
-    cgedq['xuhao'].replace('',np.nan, inplace=True)
+    cgedq['xuhao'] = cgedq['xuhao'].replace('',np.nan)
     cgedq.dropna(subset=['xuhao'], inplace=True)
 
     # cgedq.dropna(subset=['year'], inplace=True)
 
     # select only non-banner officials using surname 
     # see Table 1 in Chen (2020) 
-    cgedq['xing'].replace(BLANK,np.nan, inplace=True)
+    cgedq['xing'] = cgedq['xing'].replace(BLANK,np.nan)
     cgedq.dropna(subset=['xing'], inplace=True)
 
     # remove vacant positions with blank given names. 
     # See p443 in Chen
-    cgedq['ming'].replace('',np.nan, inplace=True)
-    cgedq['ming'].replace(KONGBAI,np.nan, inplace=True) 
+    cgedq['ming'] = cgedq['ming'].replace('',np.nan)
+    cgedq['ming'] = cgedq['ming'].replace(KONGBAI,np.nan) 
     # Sorry little Bobby Kongbai
     cgedq.dropna(subset=['ming'], inplace=True)
 
     # Replace null pinji_category (ie rank) with a default
     # pinji_category has a conversion bug when using csv
     if not stata_original_source:
-        cgedq['pinji_category'].fillna(DEFAULT_RANK, inplace=True)
-        cgedq['pinji_numeric'].fillna(DEFAULT_RANK, inplace=True)
+        cgedq['pinji_category'] =  \
+            cgedq['pinji_category'].fillna(DEFAULT_RANK)
+        cgedq['pinji_numeric'] = \
+            cgedq['pinji_numeric'].fillna(DEFAULT_RANK, inplace=True)
     if stata_original_source:
-        cgedq['pinji_category'].replace(rank_defaults , inplace=True)
+        cgedq['pinji_category'] =  \
+                cgedq['pinji_category'].replace(rank_defaults )
 
-    cgedq[personfield].replace(BLANK,np.nan, inplace=True)
+    cgedq[personfield] = cgedq[personfield].replace(BLANK,np.nan)
     cgedq.dropna(subset=[personfield], inplace=True)
 
     info( "{} clean and filtered rows".format(len(cgedq)) )
@@ -346,14 +349,14 @@ def normalize_events(ds,trans):
                         'pinji_category']].copy()
     appointments.drop_duplicates(inplace=True)
     appointments = normalize_positions_df(appointments,knownroles)
-    appointments[jobfield].replace(role_synonyms,inplace=True)
+    appointments[jobfield] = appointments[jobfield].replace(role_synonyms)
     appointments = collapse_continuing_roles(appointments)
     add_translations(appointments,trans)
     info('Appointments: {}'.format(appointments) )
     positions = ds[[jobfield]].copy()
     positions.drop_duplicates(inplace=True)
     positions = normalize_positions(positions,knownroles)
-    positions[jobfield].replace(role_synonyms,inplace=True)
+    positions[jobfield] = positions[jobfield].replace(role_synonyms)
     positions.drop_duplicates(inplace=True)
     info('Positions: {}'.format(positions) )
     return (officials,positions,appointments)
@@ -389,13 +392,13 @@ def events_position_syn(events):
     events[jobfield].replace( role_synonyms )
 
 def dbengine():
-    return create_engine(dbstr, echo=False, future=False)
+    # Was Future=False due to pandas sqlalchemy 2.0 bug
+    # https://github.com/pandas-dev/pandas/issues/40686#issuecomment-872031119
+    # https://stackoverflow.com/questions/70067023/pandas-and-sqlalchemy-df-to-sql-with-sqlalchemy-2-0-fututre-true-throws-an-er
+    return create_engine(dbstr, echo=False)
 
 def recreate_event_db(officials,positions,appointments,events=None,tmlrec=None):
     engine = dbengine()
-    # Future=False due to pandas sqlalchemy 2.0 bug
-    # https://github.com/pandas-dev/pandas/issues/40686#issuecomment-872031119
-    # https://stackoverflow.com/questions/70067023/pandas-and-sqlalchemy-df-to-sql-with-sqlalchemy-2-0-fututre-true-throws-an-er
     with engine.connect() as conn:
         officials.to_sql(OFFICIAL_TAB,con=conn,index=False,
                      index_label='person_id',if_exists='replace')
@@ -435,9 +438,11 @@ def filter_basic(cq):
     jgmask = (events[jobfield] == BLANK) & (events['jigou_1'].isin(knownroles) )
     events.loc[jgmask,jobfield] = events.loc[jgmask, 'jigou_1']
 
-    events[degreefield].replace( {'Jinshi': '進士',
-                                  'Juren': '舉人'}, inplace=True )
-    events[jobfield].replace( role_synonyms, inplace=True ) 
+    events[degreefield] = \
+            events[degreefield].replace( {'Jinshi': '進士',
+                                  'Juren': '舉人'} )
+    events[jobfield] = \
+            events[jobfield].replace( role_synonyms ) 
     return events
 
 
