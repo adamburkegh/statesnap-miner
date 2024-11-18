@@ -5,6 +5,7 @@ Scripts/
 __pycache__/
 share/
 pyvenv.cfg
+data/*.dta
 *.swp
 *.avi
 *.db
