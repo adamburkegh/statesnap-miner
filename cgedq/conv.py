@@ -248,7 +248,7 @@ def process_raw_cgedq(fin):
             cgedq['pinji_numeric'].fillna(DEFAULT_RANK, inplace=True)
     if stata_original_source:
         cgedq['pinji_category'] =  \
-                cgedq['pinji_category'].replace(rank_defaults )
+                cgedq['pinji_category'].rename_categories(rank_defaults )
 
     cgedq[personfield] = cgedq[personfield].replace(BLANK,np.nan)
     cgedq.dropna(subset=[personfield], inplace=True)
