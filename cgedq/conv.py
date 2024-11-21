@@ -18,6 +18,7 @@ Ren Yuxue, Bijia Chen, Xiaowen Hao, Cameron Campbell and James Lee. 2019. China 
 
 
 import argparse
+from dataclasses import dataclass
 from datetime import datetime
 from os.path import join
 import os.path
@@ -61,6 +62,40 @@ BLANK = 'blank'
 degreeorig = 'chushen_1_original'
 
 stata_original_source = True  
+
+personfield = 'person_id'
+#jobfield='guanzhi'
+#jobfield='core_guanzhi'
+jobfield='synjob'
+jobfield2='synjob2'
+jobfieldeng=jobfield+'_eng'
+jobfield2eng=jobfield2+'_eng'
+degreefield='chushen_category'
+
+cols=['record_number','person_id','xing','ming','zihao',
+      'ren_sheng','ren_xian','ren_xian_py',
+      'core_guanzhi','guanzhi','guanzhi_2',
+      'pinji_category','pinji_detailed',
+      'diqu','xuhao','year','jigou_1','jigou_2','jigou_3',
+      'chushen_category','chushen_1_original','chushen_2_original',
+      'chushen_order','chushen_order_2','chushen_1','chushen_2',
+      'chushen_1_jinshi_from_ganzhi']
+
+if not stata_original_source:
+    cols += ['pinji_numeric']
+
+
+
+@dataclass
+class CGEDQDatasets:
+    source: str
+    events: object
+    tmlrec: object
+    officials: object
+    positions: object
+    appointments: object
+    trans: dict
+
 
 
 def text(instr):
@@ -191,6 +226,7 @@ def loadrec(fin,converters):
         recs = pd.read_csv( fpath , converters=converters )
     elif fin.endswith('dta'):
         recs = pd.read_stata( fpath )
+        info(f'JSL stata headers: {list(recs.columns.values)}')
         if converters:
             use_converters(recs,converters)
         stata_original_source = True # side effect
@@ -247,8 +283,9 @@ def process_raw_cgedq(fin):
         cgedq['pinji_numeric'] = \
             cgedq['pinji_numeric'].fillna(DEFAULT_RANK, inplace=True)
     if stata_original_source:
-        cgedq['pinji_category'] =  \
-                cgedq['pinji_category'].rename_categories(rank_defaults )
+        cgedq['pinji_category'] = cgedq['pinji_category'].astype(str)
+        cgedq['pinji_category'] = cgedq['pinji_category'].replace(rank_defaults)
+        cgedq['pinji_category'] = cgedq['pinji_category'].astype('category')
 
     cgedq[personfield] = cgedq[personfield].replace(BLANK,np.nan)
     cgedq.dropna(subset=[personfield], inplace=True)
@@ -268,27 +305,6 @@ def process_clean_cgedq(fin):
     cq = loadrec(fin,converters=jsl_converters)
     # cq['synjob'] = cq['core_guanzhi']
     return cq
-
-
-personfield = 'person_id'
-#jobfield='guanzhi'
-#jobfield='core_guanzhi'
-jobfield='synjob'
-jobfield2='synjob2'
-jobfieldeng=jobfield+'_eng'
-jobfield2eng=jobfield2+'_eng'
-degreefield='chushen_category'
-
-cols=['record_number','person_id','xing','ming','zihao',
-      'core_guanzhi','guanzhi','guanzhi_2', 
-      'pinji_category','pinji_detailed',
-      'diqu','xuhao','year','jigou_1','jigou_2','jigou_3',
-      'chushen_category','chushen_1_original','chushen_2_original',
-      'chushen_order','chushen_order_2','chushen_1','chushen_2',
-      'chushen_1_jinshi_from_ganzhi']
-
-if not stata_original_source:
-    cols += ['pinji_numeric']
 
 
 
@@ -577,12 +593,13 @@ def export_tml_variants(jevents,tmlrec,officials,positions,appointments,trans):
     extract_norm_events(t2init,'t12jtn07',
                     officials,positions,appointments,topn=10 )
 
-
-def process(fin,rebuild_db,tmlin,inputtype,datadir):
+def load_datasets(fin,rebuild_db,tmlin,inputtype,datadir) -> CGEDQDatasets:
     global DATA_DIR 
     DATA_DIR = datadir
     trans = loadtransfile()
-    tmlrec = process_raw_tml(tmlin)
+    tmlrec = None
+    if tmlin:
+        tmlrec = process_raw_tml(tmlin)
     cq = None;  events = None
     if inputtype == 'raw':    
         cq = process_raw_cgedq(fin)
@@ -596,10 +613,20 @@ def process(fin,rebuild_db,tmlin,inputtype,datadir):
         recreate_event_db(officials,positions,appointments,events,tmlrec) 
     else:
         recreate_event_db(officials,positions,appointments) 
-    export_variants(events,officials,positions,appointments,trans)
-    if not tmlrec is None:
-        export_tml_variants(events,tmlrec,officials,positions,appointments,
-                            trans)
+    info(f"Loaded at {datetime.now()}")
+    dsname = inputtype
+    ds = CGEDQDatasets(dsname,events,tmlrec,officials,positions,appointments,
+                       trans)
+    return ds
+
+
+def process(fin,rebuild_db,tmlin,inputtype,datadir):
+    ds = load_datasets(fin,rebuild_db,tmlin,inputtype,datadir)
+    export_variants(ds.events,ds.officials,ds.positions,ds.appointments,
+                    ds.trans)
+    if not ds.tmlrec is None:
+        export_tml_variants(ds.events, ds.tmlrec, ds.officials, ds.positions,
+                            ds.appointments, ds.trans)
     info(f"Finished at {datetime.now()}")
 
 def process_public_extract():
@@ -631,8 +658,7 @@ def process_public_extract():
     info(f"Exported {len(tmlrecp)} TML records to {tmloutf}.")
     info(f"Finished public extract at {datetime.now()}")
 
-
-def main():
+def main_parse() -> object:
     parser = argparse.ArgumentParser()
     parser.add_argument('cgedqfile')
     parser.add_argument('-i','--inputtype',choices=['raw','clean'], 
@@ -640,9 +666,12 @@ def main():
     parser.add_argument('--tmlfile')
     parser.add_argument('--rebuild',action='store_true',default=False)
     parser.add_argument('--datadir',default='data')
-    args = parser.parse_args()
-    fin = args.cgedqfile
-    process(fin,args.rebuild,args.tmlfile,args.inputtype,args.datadir)
+    return parser.parse_args()
+
+def main():
+    args = main_parse()
+    process(args.cgedqfile,args.rebuild,args.tmlfile,args.inputtype,
+            args.datadir)
 
 
 if __name__ == "__main__":
