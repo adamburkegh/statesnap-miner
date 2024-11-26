@@ -6,7 +6,7 @@
 
 from cgedq.norm import normalize_positions_dict
 from cgedq.roledict import knownroles, role_synonyms
-from cgedq.roletrans import loadtransfile
+from cgedq.trans import loadroletransfile
 
 import csv
 import sys
@@ -67,7 +67,7 @@ def main():
     print(f"Loaded {len(sroles)} roles.")
     print(f"Split and exported {len(splitroles)} roles.")
     print(f"Includes {len(simproles)} unique simplified roles.")
-    tran = loadtransfile('data/roletrans.csv')
+    tran = loadroletransfile('data/roletrans.csv')
     tranroles = calctrans(simproles,tran)
     print(f"Of simplified roles, {len(tranroles)} have translations.")
     if debug:

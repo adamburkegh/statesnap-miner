@@ -32,7 +32,7 @@ from sqlalchemy import create_engine
 from cgedq.logutil import * 
 from cgedq.roledict import knownroles, role_synonyms, hanzinorm, KONGBAI, GUARD
 from cgedq.roledict import rank_defaults, topexam, zhuangyuan, bangyan, tanhua
-from cgedq.roletrans import loadtransfile
+from cgedq.trans import loadroletransfile
 from cgedq.norm import *
 
 
@@ -73,7 +73,6 @@ jobfield2eng=jobfield2+'_eng'
 degreefield='chushen_category'
 
 cols=['record_number','person_id','xing','ming','zihao',
-      'ren_sheng','ren_xian','ren_xian_py',
       'core_guanzhi','guanzhi','guanzhi_2',
       'pinji_category','pinji_detailed',
       'diqu','xuhao','year','jigou_1','jigou_2','jigou_3',
@@ -118,6 +117,17 @@ def normhanzi(instr):
         else:
             res += t
     return res
+
+
+jsl_converters = {'record_number': np.int64, 'core_guanzhi': normhanzi,  # text
+              'guanzhi': text, 'guanzhi_2': text, 
+              'jigou_1': normhanzi, 'jigou_2': normhanzi, 'jigou_3': normhanzi,
+              'diqu': text, 'person_id': text, 'year': np.float64,
+              'chushen_category': text, 'chushen_1_original': text, 
+              'pinji_detailed': text, 'xing': text }
+
+tml_converters = {'person_id': text, 'xuhao_jsl': text  # text
+                    }
 
 
 def extract_events(sevents,seventid,topn=12):
@@ -195,17 +205,6 @@ def export_events(events,suffix):
     events.to_csv(outf, encoding=denc,index=False)
     info('Exported {} rows to {}'.format(len(events),outf) )
 
-
-jsl_converters = {'record_number': np.int64, 'core_guanzhi': normhanzi,  # text
-              'guanzhi': text, 'guanzhi_2': text, 
-              'jigou_1': normhanzi, 'jigou_2': normhanzi, 'jigou_3': normhanzi,
-              'diqu': text, 'person_id': text, 'year': np.float64,
-              'chushen_category': text, 'chushen_1_original': text, 
-              'pinji_detailed': text, 'xing': text }
-
-
-tml_converters = {'person_id': text, 'xuhao_jsl': text  # text
-                    }
 
 def use_converters(df,convs):
     for conv in convs:
@@ -462,11 +461,11 @@ def filter_basic(cq):
     return events
 
 
-def apply_trans(trans):
+def apply_role_trans(trans):
     return lambda hz: trans[hz].translation if hz in trans else hz
 
 def add_translations(cq,trans):
-    cq[jobfieldeng] = cq[jobfield].apply(apply_trans(trans))
+    cq[jobfieldeng] = cq[jobfield].apply(apply_role_trans(trans))
     return cq
 
 
@@ -596,7 +595,7 @@ def export_tml_variants(jevents,tmlrec,officials,positions,appointments,trans):
 def load_datasets(fin,rebuild_db,tmlin,inputtype,datadir) -> CGEDQDatasets:
     global DATA_DIR 
     DATA_DIR = datadir
-    trans = loadtransfile()
+    trans = loadroletransfile()
     tmlrec = None
     if tmlin:
         tmlrec = process_raw_tml(tmlin)

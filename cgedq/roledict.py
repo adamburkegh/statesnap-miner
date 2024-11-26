@@ -216,6 +216,7 @@ qingprovinces = ['安徽','福建','甘肅','廣東','廣西','貴州','河南',
                 '江蘇','江西','陝西','山東','山西','四川','雲南','浙江','直隸',
                 '新疆','奉天','吉林','黑龍江','臺灣']
 regions = ['湖廣','京畿','江南','陝甘'] + qingprovinces
+# 順天 Capital province during the Qing
 FULL_PROVINCE='全省'
 
 directions = ['北','南','東','西','中']
