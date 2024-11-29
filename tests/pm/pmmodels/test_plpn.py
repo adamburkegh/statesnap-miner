@@ -1,6 +1,6 @@
 import unittest
 
-from pmmodels.plpn import *
+from pm.pmmodels.plpn import *
 
 
 

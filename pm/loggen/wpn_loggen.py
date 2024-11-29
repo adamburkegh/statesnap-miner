@@ -8,8 +8,8 @@ import datetime
 from logging import *
 import math
 
-from ssnap.ssnap import StateSnapshot
-from pmmodels.plpn import *
+from pm.ssnap.ssnap import StateSnapshot
+from pm.pmmodels.plpn import *
 
 
 class LightStateLog:

@@ -3,24 +3,24 @@ from itertools import zip_longest
 import os.path
 import unittest
 
-from ssnap.ssnap import (StateSnapshot, sslogFromCSV, sslogWithRanges, 
+from pm.ssnap.ssnap import (StateSnapshot, sslogFromCSV, sslogWithRanges, 
                          pruneForNoise, arcsSpanningTran)
-import ssnap.ssnap
+from pm.ssnap import ssnap
 from pmkoalas.models.petrinet import *
 from pmkoalas.models.pnfrag import *
 import logging
 from logging import debug, info
-from tests import ssnap as tssnap
+from tests.pm import ssnap as tssnap
 
 mpath = os.path.abspath(tssnap.__path__[0])
 
 # logging.getLogger().setLevel(logging.DEBUG)
 
 def mine(sslog):
-    return ssnap.ssnap.mine(sslog,label="ssmtest")
+    return ssnap.mine(sslog,label="ssmtest")
 
 def mineWithRecode(sslog,expected,final=False):
-    result = ssnap.ssnap.mine(sslog,label="ssmtest",final=final)
+    result = ssnap.mine(sslog,label="ssmtest",final=final)
     recodePlaces(result,expected)
     return result
 
