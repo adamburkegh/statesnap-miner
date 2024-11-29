@@ -18,10 +18,10 @@ from pm4py.objects.log.exporter.xes import exporter as xes_exporter
 from cgedq.logutil import *
 
 from pmkoalas.models.petrinet import LabelledPetriNet
-from pmmodels.pnformatter import ScaledFormatter, exportNetToScaledImage
 from pmkoalas.models.dotutil import dot_to_img, export_DOT_to_image
-import pmmodels.pm4pyviz
-from ssnap.ssnap import mine, sslogFromCSV, sslogWithRanges, reportLogStats
+from pm.pmmodels.pnformatter import ScaledFormatter, exportNetToScaledImage
+import pm.pmmodels.pm4pyviz
+from pm.ssnap.ssnap import mine, sslogFromCSV, sslogWithRanges, reportLogStats
 
 
 setLogLevel(logging.INFO)
