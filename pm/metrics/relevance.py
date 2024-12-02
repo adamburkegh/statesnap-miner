@@ -17,7 +17,7 @@ import math
 #     RESTRICTED_ZERO_ORDER = 3   # Future
 #     ROLE_SET_UNIFORM = 4        
 
-
+debug = print
 
 class TraceFrequency:
     def __init__(self,elements:dict = {}):
@@ -41,6 +41,13 @@ class TraceFrequency:
     '''
     def traces(self):
         return self._elements.keys()
+
+class RoleTraceFrequency(TraceFrequency):
+    def __init__(self,elements:dict = {}):
+        self._elements = elements
+        self._trace_total = sum( elements.values() )
+        self._roles = \
+                set( [r for t in self._elements for rs in t for r in rs] ) 
 
 
 def model_cost(modelTF: TraceFrequency, trace) -> float: 
@@ -93,9 +100,11 @@ def trace_compression_cost(logTF: TraceFrequency,
         if mf > 0:
             cost = logTF.freq(trace) * model_cost(modelTF,trace)
             mc += cost
+            # debug(f'Compression model cost: {trace!s:33} {cost}')
         else:
             cost = logTF.freq(trace) * background_cost(logTF,trace)
             bgc += cost
+            # debug(f'Compression bg cost: {trace!s:33} {cost}')
         lsum += cost
     return lsum / logTF.trace_total()
 

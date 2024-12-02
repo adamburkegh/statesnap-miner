@@ -16,6 +16,7 @@ class TraceFrequencyTest(unittest.TestCase):
         self.assertEqual( 2, mtf.role_total() )
 
 
+# From Alkhammash paper
 ltf_e1 = TraceFrequency(  
               { ('a','b'): 1200, ('a','e'): 300, ('a','b','c','d'): 220, 
                 ('a','b','c'): 100, ('a','e','e'): 100, 
@@ -40,6 +41,16 @@ mtf_a2 = TraceFrequency(
                 ('a','b','c','d','e'):12, 
                 ('a','b','c','f','d','e'):3, 
                 ('null'):3 } )
+
+# Local for rolesets
+ltf_se1 = RoleTraceFrequency(  
+              { (ss(['a']) ): 20, 
+                (ss(['a']), ss(['a','b'])): 10 } )
+
+
+mtf_sa1 = RoleTraceFrequency(
+              { (ss(['a','b'])): 20,     
+                (ss(['a']), ss(['a','b'])): 10 } )
 
 
 class EntropicRelevanceTest(unittest.TestCase):
@@ -93,10 +104,20 @@ class EntropicRelevanceTest(unittest.TestCase):
                                 relevance_uniform(ltf_e2,mtf_a2))
         self.assertAlmostEqual( 0.85545081, selector_cost(ltf_e2,mtf_a2) )
 
-    def debug_model_cost_output(self):
+    def test_local_eg_SA1_SE2(self):
+        self.assertAlmostEqual( 4.54252079,
+                                relevance_uniform_roleset(ltf_se1,mtf_sa1))
+        self.assertAlmostEqual( 0.9182958, selector_cost(ltf_se1,mtf_sa1) )
+
+    def show_model_cost_output(self):
         print( f'Model TF A1') 
         for trace in mtf_a1.traces():
             print( f'{trace!s:30}  ... {model_cost(mtf_a1,trace)}' )
+        print( '+++' )
+        print( f'Model TF SA1') 
+        for trace in mtf_sa1.traces():
+            print( f'    {trace!s:30}  ... {model_cost(mtf_sa1,trace)}' )
+        print( f'    Roles {mtf_sa1._roles}')
         print( '+++' )
         print( f'Log TF E2') 
         for trace in ltf_e2.traces():
