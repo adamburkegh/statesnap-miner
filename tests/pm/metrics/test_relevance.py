@@ -21,6 +21,12 @@ ltf_e1 = TraceFrequency(
                 ('a','b','c'): 100, ('a','e','e'): 100, 
                 ('a','b','c','d','e'): 80 }  )
 
+ltf_e2 = TraceFrequency(  
+              { ():50, ('a','b'): 50, ('a','b','c'): 50, 
+                ('a','e','a','a','e'): 40, ('a','e','e'): 20, 
+                ('a','b','c','d'): 10, ('a','b','c','d','e'): 10,
+                ('a','b','e','e'): 10, ('a','b','c','f','f'): 10 }  )
+
 mtf_a1 = TraceFrequency(
               { ('a','b'): 160, ('a','b','c'):20, ('a','b','c','d'):45,
                 ('a','b','c','d','e'):15, ('a','b','f'):80, ('a','e'):60,
@@ -48,7 +54,7 @@ class EntropicRelevanceTest(unittest.TestCase):
     def test_uniform_background_cost_rolesets(self):
         ltf = TraceFrequency( { 'a': 1, 'ba': 7 } )
         self.assertAlmostEqual( 4.6438562, 
-                               uniform_background_role_cost( ltf, 'c' ) )
+                               uniform_role_background_cost( ltf, 'c' ) )
 
     def test_uniform_background_cost_strings(self):
         ltf = TraceFrequency( { 'a': 1, 'ba': 7 } )
@@ -56,12 +62,29 @@ class EntropicRelevanceTest(unittest.TestCase):
                                uniform_background_cost( ltf, 'c' ) )
 
     def test_paper_eg_A1_E1(self):
-        self.assertAlmostEqual( 2.17209347, relevance(ltf_e1,mtf_a1) )
+        self.assertAlmostEqual( 2.17209347, relevance_uniform(ltf_e1,mtf_a1) )
         self.assertAlmostEqual( 0.0, selector_cost(ltf_e1,mtf_a1) )
 
     def test_paper_eg_A2_E1(self):
         self.assertAlmostEqual( 4.3122556, 
-                                trace_compression_cost(ltf_e1,mtf_a2) )
-        self.assertAlmostEqual( 5.0341837, relevance(ltf_e1,mtf_a2) )
+                                trace_compression_cost(ltf_e1,mtf_a2,
+                                                       uniform_background_cost))
+        self.assertAlmostEqual( 5.0341837, 
+                                relevance(ltf_e1,mtf_a2,
+                                          uniform_background_cost) )
         self.assertAlmostEqual( 0.7219281, selector_cost(ltf_e1,mtf_a2) )
+
+    def test_paper_eg_A1_E2(self):
+        self.assertAlmostEqual( 7.2714396,
+                                relevance(ltf_e2,mtf_a1,
+                                          uniform_background_cost) )
+        self.assertAlmostEqual( 0.9895875, selector_cost(ltf_e2,mtf_a1) )
+
+
+    def test_paper_eg_A2_E2(self):
+        self.assertAlmostEqual( 7.62615559,
+                                relevance(ltf_e2,mtf_a2,
+                                          uniform_background_cost) )
+        self.assertAlmostEqual( 0.85545081, selector_cost(ltf_e2,mtf_a2) )
+
 

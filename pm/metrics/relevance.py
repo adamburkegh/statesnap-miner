@@ -15,6 +15,7 @@ import math
 #     UNIFORM = 1
 #     ZERO_ORDER = 2              # Future
 #     RESTRICTED_ZERO_ORDER = 3   # Future
+#     ROLE_SET_UNIFORM = 4        
 
 
 
@@ -59,7 +60,7 @@ is included. Here we include the +1 in the formula itself.
 def uniform_background_cost(logTF,trace):
     return (len(trace) + 1) * math.log2( logTF.role_total()+1 );
 
-def uniform_background_role_cost(logTF,trace):
+def uniform_role_background_cost(logTF,trace):
     return (len(trace) + 1) * math.log2( (2**logTF.role_total())+1 );
 
 background_cost = uniform_background_cost
@@ -84,7 +85,8 @@ def selector_cost(logTF: TraceFrequency,modelTF: TraceFrequency) -> float:
 
 
 def trace_compression_cost(logTF: TraceFrequency, 
-                           modelTF: TraceFrequency) -> float:
+                           modelTF: TraceFrequency,
+                           background_cost) -> float:
     lsum = 0
     mc = 0
     bgc = 0
@@ -107,9 +109,18 @@ def uniform_prelude_cost(logTF: TraceFrequency,modelTF: TraceFrequency):
 prelude_cost = uniform_prelude_cost
 
 
-def relevance(logTF: TraceFrequency, modelTF: TraceFrequency) -> float:
+def relevance(logTF: TraceFrequency, modelTF: TraceFrequency,
+              background_cost) -> float:
     return selector_cost(logTF,modelTF) \
-         + trace_compression_cost(logTF,modelTF) \
+         + trace_compression_cost(logTF,modelTF,background_cost) \
          + prelude_cost(logTF,modelTF)
+
+
+def relevance_uniform(logTF: TraceFrequency, modelTF: TraceFrequency):
+    return relevance(logTF,modelTF,uniform_background_cost)
+
+
+def relevance_uniform_roleset(logTF: TraceFrequency, modelTF: TraceFrequency):
+    return relevance(logTF,modelTF,uniform_role_background_cost)
 
 
