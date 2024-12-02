@@ -12,7 +12,7 @@ from cgedq.trans import loadplacetransfile
 
 
 def export_regions(jevents,tmlrec,officials,positions,appointments,rtrans,
-                   ptrans):
+                   ptrans,noise=0):
     add_translations(jevents,rtrans)
     events = jevents.merge(tmlrec,on=['person_id','year'])
     info(f"Merged columns {list(events.columns.values)}")
@@ -40,7 +40,7 @@ def export_regions(jevents,tmlrec,officials,positions,appointments,rtrans,
             info(f"Extraction for {tag}")
             extract_norm_events(revent,tag,
                     officials,positions,appointments,topn=10 )
-            mineJobStates('var',tag,0)
+            mineJobStates('var',tag,noise=noise)
         else:
             info(f"Skipping empty region {region}")
         ct += 1
@@ -57,7 +57,7 @@ def mine_regions(fin,rebuild_db,tmlin,inputtype,datadir):
     print(f'Places {ptrans}')
     ds = load_datasets(fin,rebuild_db,tmlin,inputtype,datadir)
     export_regions(ds.events,ds.tmlrec,ds.officials,ds.positions,
-                   ds.appointments,ds.trans,ptrans)
+                   ds.appointments,ds.trans,ptrans,noise=0.05)
     info(f"Finished at {datetime.now()}")
 
 
