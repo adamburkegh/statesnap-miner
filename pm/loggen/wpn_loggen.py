@@ -8,10 +8,13 @@ import datetime
 from logging import *
 import math
 
-from ssnap.ssnap import StateSnapshot
-from pmmodels.plpn import *
+from pm.ssnap.ssnap import StateSnapshot
+from pm.pmmodels.plpn import *
 
 
+'''
+Keys are traces. Traces are tuples, rather than lists, as they are hashable.
+'''
 class LightStateLog:
     def __init__(self, dictlog: dict):
         self.dictlog = dictlog

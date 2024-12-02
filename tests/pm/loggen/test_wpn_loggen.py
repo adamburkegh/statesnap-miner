@@ -3,7 +3,7 @@ import tempfile
 import unittest
 
 from pmkoalas.models.pnfrag import *
-from loggen.wpn_loggen import *
+from pm.loggen.wpn_loggen import *
 
 
 def findPlace(net,label):
