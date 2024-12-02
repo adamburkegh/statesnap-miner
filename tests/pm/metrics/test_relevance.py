@@ -41,6 +41,7 @@ mtf_a2 = TraceFrequency(
                 ('a','b','c','f','d','e'):3, 
                 ('null'):3 } )
 
+
 class EntropicRelevanceTest(unittest.TestCase):
 
     def test_model_cost_error(self):
@@ -65,26 +66,40 @@ class EntropicRelevanceTest(unittest.TestCase):
         self.assertAlmostEqual( 2.17209347, relevance_uniform(ltf_e1,mtf_a1) )
         self.assertAlmostEqual( 0.0, selector_cost(ltf_e1,mtf_a1) )
 
+    def test_paper_eg_A1_E1_roleset(self):
+        self.assertAlmostEqual( 2.17209347,
+                                relevance_uniform_roleset(ltf_e1,mtf_a1) )
+
     def test_paper_eg_A2_E1(self):
         self.assertAlmostEqual( 4.3122556, 
                                 trace_compression_cost(ltf_e1,mtf_a2,
                                                        uniform_background_cost))
         self.assertAlmostEqual( 5.0341837, 
-                                relevance(ltf_e1,mtf_a2,
-                                          uniform_background_cost) )
+                                relevance_uniform(ltf_e1,mtf_a2) )
         self.assertAlmostEqual( 0.7219281, selector_cost(ltf_e1,mtf_a2) )
 
     def test_paper_eg_A1_E2(self):
         self.assertAlmostEqual( 7.2714396,
-                                relevance(ltf_e2,mtf_a1,
-                                          uniform_background_cost) )
+                                relevance_uniform(ltf_e2,mtf_a1) )
         self.assertAlmostEqual( 0.9895875, selector_cost(ltf_e2,mtf_a1) )
 
+    def test_paper_eg_A1_E2_roleset(self):
+        self.assertAlmostEqual( 0.9895875, selector_cost(ltf_e2,mtf_a1) )
+        self.assertAlmostEqual( 12.4154603,
+                                relevance_uniform_roleset(ltf_e2,mtf_a1) )
 
     def test_paper_eg_A2_E2(self):
         self.assertAlmostEqual( 7.62615559,
-                                relevance(ltf_e2,mtf_a2,
-                                          uniform_background_cost) )
+                                relevance_uniform(ltf_e2,mtf_a2))
         self.assertAlmostEqual( 0.85545081, selector_cost(ltf_e2,mtf_a2) )
+
+    def debug_model_cost_output(self):
+        print( f'Model TF A1') 
+        for trace in mtf_a1.traces():
+            print( f'{trace!s:30}  ... {model_cost(mtf_a1,trace)}' )
+        print( '+++' )
+        print( f'Log TF E2') 
+        for trace in ltf_e2.traces():
+            print( f'{trace!s:30}  ... {model_cost(ltf_e2,trace)}' )
 
 

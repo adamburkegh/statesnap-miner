@@ -66,10 +66,7 @@ def uniform_role_background_cost(logTF,trace):
 background_cost = uniform_background_cost
 
 
-'''
-Entropic relevance with uniform background cost model.
-'''
-def selector_cost(logTF: TraceFrequency,modelTF: TraceFrequency) -> float:
+def selector_cost(logTF: TraceFrequency, modelTF: TraceFrequency) -> float:
     lsum = 0
     full_coverage = True
     for trace in logTF.traces():
@@ -116,10 +113,16 @@ def relevance(logTF: TraceFrequency, modelTF: TraceFrequency,
          + prelude_cost(logTF,modelTF)
 
 
+'''
+Entropic relevance with uniform background cost model.
+'''
 def relevance_uniform(logTF: TraceFrequency, modelTF: TraceFrequency):
     return relevance(logTF,modelTF,uniform_background_cost)
 
 
+'''
+Entropic relevance with uniform roleset background cost model.
+'''
 def relevance_uniform_roleset(logTF: TraceFrequency, modelTF: TraceFrequency):
     return relevance(logTF,modelTF,uniform_role_background_cost)
 
