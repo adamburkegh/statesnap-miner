@@ -158,7 +158,8 @@ def mineByTime(vard,fname,sslog:set,years:int,noise=0.0,font=None):
             font)
     # exportNetToImage(vard,f"{fname}_ss{str(years).zfill(3)}y",pn)
 
-def mineJobStates(vard,fid,noise=0.0):
+
+def mineJobStatesByRange(vard:str,fid:str,noise:float,years:list):
     fname = f'{trange}-{fid}'
     fnameeng = fname + 'eng'
     info("Loading ..." + fname )
@@ -176,17 +177,13 @@ def mineJobStates(vard,fid,noise=0.0):
                          types = {'start_year':float,'end_year':float  },
                          keepSuccDupes=False)
     info("Mining states ..." )
-    # pn = mine(sslog)
-    # exportNetToImage(vard,oname,pn)
-    #mineByTime(vard,fname,sslog,1,noise)
-    mineByTime(vard,fname,sslog,2,noise)
-    mineByTime(vard,fname,sslog,3,noise)
-    mineByTime(vard,fname,sslog,5,noise)
-    # mineByTime(vard,fname,sslog,10)
-    mineByTime(vard,fnameeng,sslogeng,2,noise,font=ENGFONT)
-    mineByTime(vard,fnameeng,sslogeng,3,noise,font=ENGFONT)
-    mineByTime(vard,fnameeng,sslogeng,5,noise,font=ENGFONT)
+    for year in years:
+        mineByTime(vard,fname,sslog,year,noise)
+        mineByTime(vard,fnameeng,sslogeng,year,noise,font=ENGFONT)
     
+
+def mineJobStates(vard:str,fid:str,noise=0.0):
+    mineJobStatesByRange(vard,fid,noise,[2,3,5])
 
 
 def mineJobStatesFullOnly(vard,fid):
