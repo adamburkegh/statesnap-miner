@@ -392,6 +392,8 @@ provincial_censors =  \
     [(CENSOR_INSPECTING + direction + '城' + CONTROLLER + province + '道' \
                         + CENSOR,CENSOR)  \
                             for direction in directions \
+                            for province in regions]  + \
+    [(province + '道'+ CENSOR,CENSOR) \
                             for province in regions] 
 known_roles, role_synonyms = new_synonyms(provincial_censors)
 
