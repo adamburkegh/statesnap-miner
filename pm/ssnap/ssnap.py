@@ -152,7 +152,12 @@ def pruneForNoise(pnet,noiseThreshold):
                         if tran.weight > weightThreshold])
     keeparcs = [arc for arc in pnet.arcs \
                     if arc.from_node in keeptrans or arc.to_node in keeptrans]
-    result = LabelledPetriNet(pnet.places,keeptrans,keeparcs,pnet.name)
+    keepplaces = set([arc.from_node for arc in keeparcs \
+                            if arc.from_node in pnet.places ])
+    keepplaces = keepplaces.union(
+                    set([arc.to_node for arc in keeparcs \
+                            if arc.to_node in pnet.places ]) )
+    result = LabelledPetriNet(keepplaces,keeptrans,keeparcs,pnet.name)
     return result
 
 def mine(sslog: dict, label=None, noiseThreshold=0.0, final=False) \
