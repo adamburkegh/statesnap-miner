@@ -210,6 +210,9 @@ COUNTY_MAGISTRATE = '知縣'
 COUNTY_PREFECT = '知府'
 countyroles = [COUNTY_MAGISTRATE,COUNTY_PREFECT]
 
+DEPARTMENT_MAGISTRATE = '知州'
+magistrates = [DEPARTMENT_MAGISTRATE]
+
 DEFAULT_RANK=8
 
 qingprovinces = ['安徽','福建','甘肅','廣東','廣西','貴州','河南','湖北','湖南',
@@ -336,6 +339,7 @@ POLICE_CHIEF2 = '巡検'
 knownroles = []
 
 knownroles += countyroles
+knownroles += magistrates
 knownroles += examiners
 knownroles += educators
 knownroles += students
