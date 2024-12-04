@@ -5,6 +5,8 @@ Position,Pinyin,Translation,Source
 编修,bianxiu,editor,GT
 兵備道,bingbeidao,Military clerk,AB
 笔贴式,bitieshi,scribe,Chen
+博士,boshi,Erudite,Hucker
+博士師,boshishi,Erudite,Hucker
 漕標中軍副將,caobiao zhongjun fujiang,Brigadier River Transport ,AB
 叅將,canjiang,Staff Captain,WP
 春坊,chunfang,Secretariat of the Heir Apparent,Hucker
@@ -27,6 +29,7 @@ Position,Pinyin,Translation,Source
 管理,guanli,Manager,Hucker
 管轄,guanxia,Supervisor,Hucker
 國子監祭酒,guozijian jijiu,Imperial College Chancellor,Hucker
+繙譯,Hanlinyuan fanyi,Hanlin Translator,AB
 翰林院撿討,Hanlinyuan jiantao,Hanlin Examining Editor (with typo 撿 for 檢),AB
 翰林院侍講學士,Hanlinyuan shidu xueshi,Hanlin Reader,AB
 翰林院修撰,Hanlinyuan xiuzhuan,Hanlin Senior Compiler,AB
@@ -43,6 +46,7 @@ Position,Pinyin,Translation,Source
 教習,jiaoxi,Instructor,Hucker
 敎習,jiaoxi,Instructor,Hucker
 教習大臣,jiaoxi dachen,Grand Minister Instructor,Hucker
+教諭,jiaoyu,Instructor,WT
 監察御史,jiancha yushi,Censor,Chen
 檢討,jiantao,Examining Editor,Chen
 進士,jinshi,imperial exam degree,WT
@@ -89,23 +93,25 @@ Position,Pinyin,Translation,Source
 題分巡,tifenxun,Head Commissioner of Surveillance Circuit,AB
 督糧道,tiliangdao,Grain Transport Controller,AB
 提塘,titang,Provincial Courier,Hucker
+同知,tongzhi,Associate Administrator,Hucker
 頭等侍衛,toudeng shiwei,First Rank Imperial Bodyguard,AB
 頭品頂戴,touping dingdai,First Button,AB
 文淵閣校理,Wenyuan ge xiaoli,Member of the Hall of Profundity,Hucker
 小京官,xiaojingguan,minor capital official,Chen
 協辦大學士,xieban daxueshi,Assistant Grand Secretary,Hucker
-洗馬,xima,Librarian,Hucker
+洗馬,xima,Librarian to the Heir Apparent,Hucker
 學士,xueshi,Academician,Chen
 修撰,xiuzhuan,Senior Compiler,Chen
 學政,xuezheng,Provincial Education Commissioner,Hucker
 學政,xuezheng,(county level juren),Chen
-學正,xuezheng,junior offical,AB
+學正,xuezheng,Instructor in a Confucian School,Hucker
 巡視...御史,xunshi ... yushi,Ward-Inspecting Censor for the (Central | Eastern | ...) Ward,Hucker
 訓導,xundao,Assistant School Instructor (county or prefecture),Chen
 巡檢,xunjian,Police Chief,Hucker
 巡検,xunjian,Police Chief,Hucker
 巡檢司,xunjian si,Police Office,Hucker
 鹽運使司運同,yanyenshisi yentong,Salt Distribution Commission ,Hucker
+醫士,yishi,Physician,Hucker
 毓慶宫行走,yuqinggong,Yuqing Palace Attendant,AB
 御前侍衛,yuqian shiwei,Imperial Bodyguard to the Royal Family,AB
 員外郎,yuanwailang,Bureau Vice Director,Chen
@@ -124,7 +130,8 @@ Position,Pinyin,Translation,Source
 正總裁,zhengzongcai,Senior Director-General,AB
 知府,zhifu,Prefect,Chen
 知縣,zhixian,County Magistrate,Chen
-知州,zhizhou,Department Magistrate,Chen
+知州,zhizhou,Department Magistrate,Hucker
+執事官,zhishiguan,Attendant,WT
 中書,zhongshu,Secretary,Chen
 中允,zhongyun,Companion to the Heir Apparent,Hucker
 狀元,zhuangyan,Optimus (highest jinshi exam place),Chen
