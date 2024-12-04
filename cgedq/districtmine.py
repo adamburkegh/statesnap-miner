@@ -29,22 +29,20 @@ def export_districts(jevents,tmlrec,officials,positions,appointments,rtrans,
     #
     ct = 1
     districts = t12init['ren_xian'].unique()
-    print(districts)
     for district in districts:
         rt = 'd' + str(ct)
         if district in ptrans:
             rt = ptrans[district]
         tag = 't12' + rt
-        print(f'District {tag} -- {district}')
         revent = t12init[t12init['ren_xian'] == district].copy()
         people = revent['person_id'].unique()
         if len(people) > pfloor:
-            info(f"Extraction for {tag}")
+            print(f'District {tag} -- {district} ... extraction')
             extract_norm_events(revent,tag,
                     officials,positions,appointments,topn=10 )
             mineJobStatesByRange('var',tag,noise=noise,years=[5,10,15])
         else:
-            info(f"Skipping district {district} with fewer than {pfloor} people")
+            info(f"Skipping district {tag} -- {district} with fewer than {pfloor} people")
         ct += 1
 
 
@@ -59,7 +57,7 @@ def mine_districts(fin,rebuild_db,tmlin,inputtype,datadir):
     print(f'Places {ptrans}')
     ds = load_datasets(fin,rebuild_db,tmlin,inputtype,datadir)
     export_districts(ds.events,ds.tmlrec,ds.officials,ds.positions,
-                   ds.appointments,ds.trans,ptrans,noise=0.01,pfloor=10)
+                   ds.appointments,ds.trans,ptrans,noise=0.02,pfloor=10)
     info(f"Finished at {datetime.now()}")
 
 
