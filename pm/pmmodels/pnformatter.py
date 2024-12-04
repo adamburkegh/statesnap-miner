@@ -13,8 +13,8 @@ class ScaledFormatter(PetriNetDOTFormatter):
         rfont = 'SimSun' if (font is None) else font
         super().__init__(pn,rfont)
         self._nodemap = {}
-        # self._defaultHeight = 0.2
-        self._defaultFontSize=12
+        # self._default_height = 0.2
+        self._default_font_size=12
         actfreq = {}
         actsum = 0
         for caseId in sslog:
@@ -32,7 +32,7 @@ class ScaledFormatter(PetriNetDOTFormatter):
         self._plscale = 2
 
 
-    def tranDOT(self,tran,ti):
+    def transform_transition(self,tran,ti):
         tl = '' # tran.name if tran.name and tran.name != 'tau' else '&tau;'
         SPACE = ' '
         if SPACE in tl:
@@ -44,9 +44,9 @@ class ScaledFormatter(PetriNetDOTFormatter):
         fstr += '];\n'
         return fstr
 
-    def placeDOT(self,place,pi):
-        height = self._defaultHeight
-        fs = self._defaultFontSize
+    def transform_place(self,place,pi):
+        height = self._default_height
+        fs = self._default_font_size
         SPACE = ' '
         placeName = place.name
         if SPACE in place.name:
@@ -54,22 +54,22 @@ class ScaledFormatter(PetriNetDOTFormatter):
         if place.name in self._actfreq:
             sf = self._plscale * \
                    math.sqrt(self._sf * self._actfreq[place.name] /self._actsum)
-            height = self._defaultHeight + sf
-            fs = round(self._defaultFontSize + 8*sf)
+            height = self._default_height + sf
+            fs = round(self._default_font_size + 8*sf)
         fstr = f'n{str(pi)} [shape="circle",label="{placeName}",'
         fstr += f'height="{height}", fontsize="{fs}"];\n'
         return fstr
 
-    def arcDOT(self,arc):
-        fromNode = self._nodemap[arc.fromNode]
-        toNode = self._nodemap[arc.toNode]
+    def transform_arc(self,arc):
+        from_node = self._nodemap[arc.from_node]
+        to_node = self._nodemap[arc.to_node]
         weight = 1
-        if arc.fromNode in self._pn.transitions:
-            weight = arc.fromNode.weight
-        elif arc.toNode in self._pn.transitions:
-            weight = arc.toNode.weight
+        if arc.from_node in self._pn.transitions:
+            weight = arc.from_node.weight
+        elif arc.to_node in self._pn.transitions:
+            weight = arc.to_node.weight
         asize = self._arcscale * math.sqrt(self._sf * weight / self._actsum )
-        return f'n{fromNode}->n{toNode}[penwidth="{asize}"]\n'
+        return f'n{from_node}->n{to_node}[penwidth="{asize}"]\n'
 
 
 def exportToScaledDOT(net,sslog: set,font) -> str:
