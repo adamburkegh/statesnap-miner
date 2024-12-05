@@ -42,7 +42,7 @@ def mine_by_job(job,tag,fin,rebuild_db,tmlin,inputtype,datadir):
     info(f"Started at {datetime.now()}")
     ds = load_datasets(fin,rebuild_db,tmlin,inputtype,datadir)
     mine_export_job(job,tag,ds.events,ds.tmlrec,ds.officials,ds.positions,
-                   ds.appointments,ds.trans,noise=0.003)
+                   ds.appointments,ds.trans,noise=0.001)
     info(f"Finished at {datetime.now()}")
 
 
