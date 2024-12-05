@@ -43,6 +43,8 @@ Position,Pinyin,Translation,Source
 稽察翼宗學,jicha yi zongxue,Inspector of the Imperial Clan Academy,AB
 祭酒,jijiu,Libationer,WT
 吉士,jishi,Abbreviation for 庶吉士,Chen
+敎授,jiaoshou,Instructor (Prefecture School Head),Hucker
+教授,jiaoshou,Instructor (Prefecture School Head),Hucker
 教習,jiaoxi,Instructor,Hucker
 敎習,jiaoxi,Instructor,Hucker
 教習大臣,jiaoxi dachen,Grand Minister Instructor,Hucker
@@ -50,7 +52,7 @@ Position,Pinyin,Translation,Source
 監察御史,jiancha yushi,Censor,Chen
 檢討,jiantao,Examining Editor,Chen
 進士,jinshi,imperial exam degree,WT
-京官,xiaojingguan,capital official,Chen
+京官,jingguan,Capital Official,Hucker
 經筵講官,jingyanduguan,Classics Colloquium Reader,Hucker
 举人,juren,provincial exam degree,WT
 軍機大臣,junji dachen,Grand Minister of State,Hucker
@@ -97,17 +99,17 @@ Position,Pinyin,Translation,Source
 同知,tongzhi,Associate Administrator,Hucker
 頭等侍衛,toudeng shiwei,First Rank Imperial Bodyguard,AB
 頭品頂戴,touping dingdai,First Button,AB
-文淵閣校理,Wenyuan ge xiaoli,Member of the Hall of Profundity,Hucker
-小京官,xiaojingguan,minor capital official,Chen
+文淵閣校理,Wenyuan ge xiaoli,Hall of Literary Profundity,Hucker
+小京官,xiaojingguan,Minor Capital Official,Chen
 協辦大學士,xieban daxueshi,Assistant Grand Secretary,Hucker
 洗馬,xima,Librarian to the Heir Apparent,Hucker
 學士,xueshi,Academician,Chen
 修撰,xiuzhuan,Senior Compiler,Chen
 學政,xuezheng,Provincial Education Commissioner,Hucker
 學政,xuezheng,(county level juren),Chen
-學正,xuezheng,Instructor in a Confucian School,Hucker
+學正,xuezheng,Instructor (Sub-Provincial),Hucker
 巡視...御史,xunshi ... yushi,Ward-Inspecting Censor for the (Central | Eastern | ...) Ward,Hucker
-訓導,xundao,Assistant School Instructor (county or prefecture),Chen
+訓導,xundao,Assistant Instructor,Hucker
 巡檢,xunjian,Police Chief,Hucker
 巡検,xunjian,Police Chief,Hucker
 巡檢司,xunjian si,Police Office,Hucker

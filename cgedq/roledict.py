@@ -61,10 +61,13 @@ COURIER='提塘'
 couriers = set([COURIER])
 
 
-INSTRUCTOR='教習'
-INSTRUCTOR2='敎習'
+INSTRUCTOR  ='教習'
+INSTRUCTOR2 ='敎習'
+INSTRUCTOR_PREFECTURE   ='教授'
+INSTRUCTOR_PREFECTURE2  ='敎授'
 # GRAND_MINISTER_INSTRUCTOR='教習大臣' In Hucker but not data
-educators = set([INSTRUCTOR,INSTRUCTOR2])
+educators = set([INSTRUCTOR,INSTRUCTOR2,
+                 INSTRUCTOR_PREFECTURE, INSTRUCTOR_PREFECTURE2])
 
 UPPER_STUDENT='上書房'
 UPPER_STUDENT2='上書房'
@@ -417,6 +420,9 @@ provincial_couriers = \
     [ (province + courier,courier) for province in regions 
                                    for courier in couriers]
 known_roles, role_synonyms = new_synonyms(provincial_couriers)
+
+role_synonyms |= {INSTRUCTOR2 : INSTRUCTOR,
+                  INSTRUCTOR_PREFECTURE2: INSTRUCTOR_PREFECTURE} 
 
 provincial_bachelors = [ province + HANLIN + BACHELOR for province in regions]
 role_synonyms |= dict([(pb,BACHELOR) for pb in provincial_bachelors])
