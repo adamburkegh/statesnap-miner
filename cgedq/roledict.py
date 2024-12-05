@@ -191,6 +191,7 @@ CHIEF_SHIFU2='總師傅'
 masters = set([CHIEF_SHIFU,CHIEF_SHIFU2])
 
 BACHELOR = '庶吉士'
+TRUNC_HANLIN_BACHELOR = '院庶吉士'
 DAY_OFFICIAL='日講起居注官' 
 DAY_READER='日講起居官'
 JUNIOR_COMPILER='编修'
@@ -434,6 +435,8 @@ ganzhi_bachelors += [ gz + '恩科' + HANLIN + BACHELOR for gz in ganzhi]
 # print( "Ganzhi bachelors {}".format(ganzhi_bachelors) )
 role_synonyms |= dict([(gb,BACHELOR) for gb in ganzhi_bachelors])
 knownroles += ganzhi_bachelors
+
+role_synonyms |= {TRUNC_HANLIN_BACHELOR:BACHELOR}
 
 provincial_board_directors = [(BOARD_DIRECTOR + province + PROVINCIAL_TEMPS,
                               BOARD_DIRECTOR) for province in regions ]
