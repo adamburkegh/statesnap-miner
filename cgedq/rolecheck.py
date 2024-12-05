@@ -4,10 +4,11 @@
 # consolidated roles. This is based on preference rules across guanzhi and 
 # jigou fields, but is before normalization by splitting.
 
-from cgedq.norm import normalize_positions_dict
+from cgedq.norm import normalize_positions_dict, split_position
 from cgedq.roledict import knownroles, role_synonyms
 from cgedq.trans import loadroletransfile
 
+import argparse
 import csv
 import sys
 
@@ -53,24 +54,50 @@ def calcsimplified(splitroles):
 def calctrans(roles,trans):
     return set([role for role in roles if role in trans])
 
+'''
+Take the string of a position output by the role normalisation process,
+and identify which pre-norm roles it came from.
+'''
+def trace_position(position,sourceroles):
+    res = []
+    for cpos in sourceroles:
+        sroles = split_position(cpos,knownroles)
+        if position in sroles:
+            res.append( ( cpos,sroles) )
+    return res
+
+def trace_main(position,sourceroles):
+    print(f'Tracing position {position} across {len(sourceroles)} roles')
+    sourcepos = trace_position(position,sourceroles)
+    if not sourcepos:
+        print(f'No such entry.')
+    for (pos,roles) in sourcepos:
+        print(f'    Original job entry: {pos}')
+        print(f'    Split into:')
+        for srole in roles:
+            print(f'        {srole}')
+    return
+
 def main():
-    fname = 'data/zyroles.csv'
-    debug = False
-    if (len(sys.argv) == 2):
-        fname = sys.argv[1]
-    if (len(sys.argv) == 3) and sys.argv[2] == '--debug':
-        debug = True
-    sroles = loadrolefile(fname)
-    splitroles = rolecheck(loadrolefile(fname))
+    parser = argparse.ArgumentParser()
+    parser.add_argument('rolefile',default='data/zyroles.csv',nargs='?')
+    parser.add_argument('-d','--debug',default=False, action='store_true')
+    parser.add_argument('-t','--trace')
+    args = parser.parse_args()
+    sroles = loadrolefile(args.rolefile)
+    if args.trace:
+        trace_main(args.trace,sroles)
+        return
+    splitroles = rolecheck(loadrolefile(args.rolefile))
     simproles = calcsimplified(splitroles)
-    exportroles('var/out.csv',splitroles)
+    exportroles('var/rcout.csv',splitroles)
     print(f"Loaded {len(sroles)} roles.")
     print(f"Split and exported {len(splitroles)} roles.")
     print(f"Includes {len(simproles)} unique simplified roles.")
     tran = loadroletransfile('data/roletrans.csv')
     tranroles = calctrans(simproles,tran)
     print(f"Of simplified roles, {len(tranroles)} have translations.")
-    if debug:
+    if args.debug:
         for tr in tran:
             print(f'{tr} {tran[tr]}')
 
