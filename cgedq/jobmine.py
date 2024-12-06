@@ -35,6 +35,7 @@ def mine_export_job(job,tag,jevents,tmlrec,officials,positions,appointments,
     extract_norm_events(jinit,tag,
                     officials,positions,appointments,topn=10 )
     mineJobStatesByRange('var',tag,noise=noise,years=[5,10,15,20,25,80])
+    mineJobStatesByRange('var','top'+tag,noise=noise,years=[5,10,15,20,25,80])
 
 
 
