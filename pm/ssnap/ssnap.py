@@ -142,6 +142,25 @@ def minePure(sslog: dict,label=None,final=True) -> LabelledPetriNet:
     return LabelledPetriNet( places = places, transitions = transitions, 
                              arcs = arcs, name=label )
 
+'''
+Prune transitions with weights below a noise threshold, their arcs, and if no arcs connecting them exist, the corresponding places.
+
+This noise reduction can produce disconnected nets if there is no role conflation for low-frequency places. For example if the noise threshold is two, the following net will be disconnected after noise reduction.
+
+(I)  -> [1] -> (p1) -> [1] -> (p4)
+(I)  -> [1] -> (p2) -> [1] -> (p4) -> [4] -> (p5)
+(I)  -> [1] -> (p3) -> [1] -> (p4)
+(I)  -> [3]                               -> (p6)
+
+(This follows the ASCII art notation of the pnfrag tool. Repeated place nodes with the same label represent the same place.)
+
+This gets noise reduced to:
+
+(I)  -> [3] -> (p6)
+(p4) -> [4] -> (p5)
+
+Which is disconnected.
+'''
 def pruneForNoise(pnet,noiseThreshold):
     tsum = 0
     for tran in pnet.transitions:
@@ -150,8 +169,8 @@ def pruneForNoise(pnet,noiseThreshold):
     debug(f'weight threshold: {weightThreshold}')
     keeptrans = set([tran for tran in pnet.transitions \
                         if tran.weight > weightThreshold])
-    keeparcs = [arc for arc in pnet.arcs \
-                    if arc.from_node in keeptrans or arc.to_node in keeptrans]
+    keeparcs = set([arc for arc in pnet.arcs \
+                    if arc.from_node in keeptrans or arc.to_node in keeptrans])
     keepplaces = set([arc.from_node for arc in keeparcs \
                             if arc.from_node in pnet.places ])
     keepplaces = keepplaces.union(
