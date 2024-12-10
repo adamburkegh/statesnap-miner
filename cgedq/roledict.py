@@ -199,12 +199,17 @@ JUNIOR_COMPILER2='編修'
 SENIOR_COMPILER='修撰' 
 ATTENDANT_READER='侍讀'
 ATTENDANT='侍講'
+ACADEMICIAN_READER_IN_WAITING=ATTENDANT_READER+ACADEMICIAN
+HANLIN_ACAD_RIW=HANLIN + ATTENDANT_READER + ACADEMICIAN
 LIBATIONER=DIRECTORATE_EDUCATION+'祭酒'
 LIBRARIAN='洗馬'
 MINOR_CAPITAL_OFFICIAL='小京官'
-juniorroles=[BACHELOR,DAY_OFFICIAL,JUNIOR_COMPILER,SENIOR_COMPILER,
-             ATTENDANT_READER,ATTENDANT,COLLOQ_READER,
-             LIBATIONER,LIBRARIAN,MINOR_CAPITAL_OFFICIAL]
+juniorroles=[DAY_OFFICIAL,JUNIOR_COMPILER,SENIOR_COMPILER, 
+             ATTENDANT_READER,ATTENDANT,
+             ACADEMICIAN_READER_IN_WAITING,HANLIN_ACAD_RIW,
+             COLLOQ_READER,
+             LIBATIONER,LIBRARIAN,MINOR_CAPITAL_OFFICIAL,
+             BACHELOR,TRUNC_HANLIN_BACHELOR]
 
 ADMIN='事務'
 ADMIN2='侍務'
@@ -437,6 +442,7 @@ role_synonyms |= dict([(gb,BACHELOR) for gb in ganzhi_bachelors])
 knownroles += ganzhi_bachelors
 
 role_synonyms |= {TRUNC_HANLIN_BACHELOR:BACHELOR}
+role_synonyms |= {HANLIN_ACAD_RIW:ACADEMICIAN_READER_IN_WAITING}
 
 provincial_board_directors = [(BOARD_DIRECTOR + province + PROVINCIAL_TEMPS,
                               BOARD_DIRECTOR) for province in regions ]
@@ -527,6 +533,9 @@ recofficials = [office + role for role in recordsroles
 role_synonyms |= dict( [(office+role,role) for role in recordsroles
                                            for office in offices] )
 knownroles += recofficials
+
+PALACE_SCHOOL = '咸安宮' # Palace of Universal Peace
+knownroles, role_synonyms = new_synonyms( [(PALACE_SCHOOL + CHAIR, CHAIR) ] )
 
 classicsroles = [READER,DAY_OFFICIAL,DAY_READER]
 classicists = [COLLOQ + role for role in classicsroles]
