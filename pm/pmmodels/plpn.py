@@ -14,7 +14,7 @@ class Marking:
     net: LabelledPetriNet
     mark: Dict[Place,int]
 
-def singleton_marking(net, mark: list[Place]):
+def singleton_marking(net, mark: list[Place]) -> Marking:
     fullmark = { p: 1 for p in mark }
     return Marking(net,fullmark)
         

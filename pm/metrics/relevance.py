@@ -11,6 +11,8 @@ Uniform background model only.
 
 import math
 
+from pm.pmmodels.tracefreq import *
+
 # class BackgroundModel(Enum):
 #     UNIFORM = 1
 #     ZERO_ORDER = 2              # Future
@@ -18,36 +20,6 @@ import math
 #     ROLE_SET_UNIFORM = 4        
 
 debug = print
-
-class TraceFrequency:
-    def __init__(self,elements:dict = {}):
-        self._elements = elements
-        self._trace_total = sum( elements.values() )
-        self._roles = set( [r for t in self._elements for r in t] ) 
-
-    def freq(self,trace):
-        if trace in self._elements:
-            return self._elements[trace]
-        return 0
-
-    def trace_total(self):
-        return self._trace_total
-
-    def role_total(self):
-        return len(self._roles)
-
-    '''
-    Treat return value as read-only.
-    '''
-    def traces(self):
-        return self._elements.keys()
-
-class RoleTraceFrequency(TraceFrequency):
-    def __init__(self,elements:dict = {}):
-        self._elements = elements
-        self._trace_total = sum( elements.values() )
-        self._roles = \
-                set( [r for t in self._elements for rs in t for r in rs] ) 
 
 
 def model_cost(modelTF: TraceFrequency, trace) -> float: 
@@ -125,14 +97,15 @@ def relevance(logTF: TraceFrequency, modelTF: TraceFrequency,
 '''
 Entropic relevance with uniform background cost model.
 '''
-def relevance_uniform(logTF: TraceFrequency, modelTF: TraceFrequency):
+def relevance_uniform(logTF: TraceFrequency, modelTF: TraceFrequency) -> float:
     return relevance(logTF,modelTF,uniform_background_cost)
 
 
 '''
 Entropic relevance with uniform roleset background cost model.
 '''
-def relevance_uniform_roleset(logTF: TraceFrequency, modelTF: TraceFrequency):
+def relevance_uniform_roleset(logTF: TraceFrequency, 
+                              modelTF: TraceFrequency) -> float:
     return relevance(logTF,modelTF,uniform_role_background_cost)
 
 

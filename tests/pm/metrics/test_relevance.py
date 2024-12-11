@@ -104,7 +104,7 @@ class EntropicRelevanceTest(unittest.TestCase):
                                 relevance_uniform(ltf_e2,mtf_a2))
         self.assertAlmostEqual( 0.85545081, selector_cost(ltf_e2,mtf_a2) )
 
-    def test_local_eg_SA1_SE2(self):
+    def test_local_eg_SA1_SE1(self):
         self.assertAlmostEqual( 4.54252079,
                                 relevance_uniform_roleset(ltf_se1,mtf_sa1))
         self.assertAlmostEqual( 0.9182958, selector_cost(ltf_se1,mtf_sa1) )
