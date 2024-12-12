@@ -73,8 +73,10 @@ Position,Pinyin,Translation,Source
 賞用紫韁,shangyong zigang,Order of the Purple Bridle,AB
 上書房行走,shang shufang xingzou,Casual scholar,AB
 尚書,shangshu,Minister,Chen
-侍讀,shidu,attendant reader,AB
-侍講,shijiang,attendant,WT
+侍讀,shidu,Reader-in-waiting,Hucker
+侍讀學士,shidu xueshi,Academician Reader-in-waiting,Hucker
+侍講,shijiang,Expositor-in-waiting,Hucker
+侍講學士,shijiang xueshi,Academician Expositor-in-waiting,Hucker
 侍郎,shilang,Vice Minister,Chen
 侍衛,shiwei,Imperial Guard,WT
 侍衛司,shiweisi,Metropolitan Command Guard,Hucker
