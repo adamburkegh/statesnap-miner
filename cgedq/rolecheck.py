@@ -75,7 +75,10 @@ def trace_main(position,sourceroles):
         print(f'    Original job entry: {pos}')
         print(f'    Split into:')
         for srole in roles:
-            print(f'        {srole}')
+            indict = "No entry"
+            if srole in knownroles:
+                indict = "Known role"
+            print(f'        {srole}     {indict}')
     return
 
 def main():
