@@ -181,8 +181,28 @@ class RoleStateNetSemanticsTest(unittest.TestCase):
         sem = RoleStateNetSemantics(marking1)
         self.assertEqual( set([tb]), sem.enabled() ) 
 
-
-
-
+    def test_sequence_with_escape_routes(self):
+        pi = Place("I","pi")
+        p1 = Place("p1","p1")
+        p2 = Place("p2","p2")
+        pf = Place("F","pf")
+        ta = RSTransition("a")
+        tb = RSTransition("b")
+        t_pc = RSTransition("p_c",True)
+        t_pd = RSTransition("p_d",True)
+        net = LabelledPetriNet([pi,p1,p2,pf],[ta,tb,t_pc,t_pd],  
+                               [Arc(pi,ta), Arc(ta,p1), Arc(p1,tb), Arc(tb,p2),
+                                Arc(p1,t_pc), Arc(t_pc,pf),
+                                Arc(p2,t_pd), Arc(t_pd,pf)],
+                               "seq-escape")
+        marking1 = singleton_marking(net, [pi])
+        sem = RoleStateNetSemantics(marking1)
+        self.assertEqual( set([ta]), sem.enabled() ) 
+        sem.remark(ta)
+        marking2 = singleton_marking(net, [p1])
+        sem = RoleStateNetSemantics(marking2)
+        self.assertEqual( set([tb,t_pc]), sem.enabled() ) 
+        fmarking = sem.remark(t_pc)
+        self.assertEqual( set([pf]), set(fmarking.mark.keys()) ) 
 
 
