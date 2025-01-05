@@ -23,6 +23,7 @@ Position,Pinyin,Translation,Source
 撫標中軍叅將,fubiao zhongjun canjiang,Brigadier Governor's Army,AB
 副將,fujiang,Brigadier,AB
 副將,fujiang,Vice-General,Hucker
+復設敎諭,fushe jiaoyu,Returning Instructor,AB
 副考官,fukaoguan,Vice Examiner,AB
 副主考,fuzhukao,Assistant Provincial Examiner,Hucker
 副總裁,fuzongcai,Vice Chairman,AB
@@ -73,8 +74,10 @@ Position,Pinyin,Translation,Source
 賞用紫韁,shangyong zigang,Order of the Purple Bridle,AB
 上書房行走,shang shufang xingzou,Casual scholar,AB
 尚書,shangshu,Minister,Chen
-侍讀,shidu,attendant reader,AB
-侍講,shijiang,attendant,WT
+侍讀,shidu,Reader-in-waiting,Hucker
+侍讀學士,shidu xueshi,Academician Reader-in-waiting,Hucker
+侍講,shijiang,Expositor-in-waiting,Hucker
+侍講學士,shijiang xueshi,Academician Expositor-in-waiting,Hucker
 侍郎,shilang,Vice Minister,Chen
 侍衛,shiwei,Imperial Guard,WT
 侍衛司,shiweisi,Metropolitan Command Guard,Hucker
@@ -129,10 +132,12 @@ Position,Pinyin,Translation,Source
 掌...道監察御史,zhang ... <region> dao jianchayushi,Investigating Censor of the ... Provincial Circuit,AB
 正考官,zhengkaoguan,Principal Examiner,Hucker
 正主考,zhengzhukao,Principal Chief Examiner,AB
-政使,zhengshi,(government officer),AB
+政使,zhengshi,Commissioner,AB
+正指揮,zhengzhihui,Principal Commander,AB
 正總裁,zhengzongcai,Senior Director-General,AB
 知府,zhifu,Prefect,Chen
 知縣,zhixian,County Magistrate,Chen
+指揮,zhihui,Commander,Hucker
 知州,zhizhou,Department Magistrate,Hucker
 執事官,zhishiguan,Attendant,WT
 中書,zhongshu,Secretary,Chen

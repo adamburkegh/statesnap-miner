@@ -15,7 +15,7 @@ def mine_export_job(job,tag,jevents,tmlrec,officials,positions,appointments,
     add_translations(jevents,rtrans)
     events = jevents.merge(tmlrec,on=['person_id','year'])
     info(f"Merged columns {list(events.columns.values)}")
-    sjevents = events[events['synjob'] == '知縣'].copy()
+    sjevents = events[events['synjob'] == job].copy()
     jpeople = sjevents['person_id'].unique()
     if len(sjevents) == 0:
         print('No events')
@@ -39,18 +39,22 @@ def mine_export_job(job,tag,jevents,tmlrec,officials,positions,appointments,
 
 
 
-def mine_by_job(job,tag,fin,rebuild_db,tmlin,inputtype,datadir):
+def mine_by_job(job,tag,noise,fin,rebuild_db,tmlin,inputtype,datadir):
     info(f"Started at {datetime.now()}")
     ds = load_datasets(fin,rebuild_db,tmlin,inputtype,datadir)
-    mine_export_job(job,tag,ds.events,ds.tmlrec,ds.officials,ds.positions,
-                   ds.appointments,ds.trans,noise=0.001)
+    mine_export_job(job,tag,ds.events,ds.tmlrec,ds.officials,
+                    ds.positions,ds.appointments,ds.trans,noise)
     info(f"Finished at {datetime.now()}")
 
 
 def main():
     args = main_parse()
-    mine_by_job('知縣','jmagistrate', args.cgedqfile,args.rebuild,args.tmlfile,
-                args.inputtype, args.datadir)
+    mine_by_job('知縣','jmagistrate', 0.001, args.cgedqfile,args.rebuild,
+                args.tmlfile, args.inputtype, args.datadir)
+    # mine_by_job('文淵閣校理','jprofound', 0.002, args.cgedqfile,args.rebuild,
+    #            args.tmlfile, args.inputtype, args.datadir)
+    # mine_by_job('中允','jcomp', 0.002, args.cgedqfile,args.rebuild,
+    #             args.tmlfile, args.inputtype, args.datadir)
 
 
 if __name__ == "__main__":
