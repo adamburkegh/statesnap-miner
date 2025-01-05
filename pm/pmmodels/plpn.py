@@ -29,12 +29,13 @@ class PetriNetSemantics:
         self._net = marking.net
         self._mark = marking
         # for each transition compute the incoming and outgoing places
+        # self._incoming
+        # self._outgoing
+        self._init_arc_context()
+
+    def _init_arc_context(self):
         self._incoming:Dict[Transition,Set[Place]] = dict()
         self._outgoing:Dict[Transition,Set[Place]] = dict()
-        self._update_arc_context()
-
-    def _update_arc_context(self):
-        # Inefficient: checks every transition every time
         for trans in self._net.transitions:
             arcs = self._net.arcs
             incoming = [ arc for arc in arcs if  arc.to_node == trans ]
@@ -82,7 +83,6 @@ class PetriNetSemantics:
             else:
                 next_mark[outgoing] = 1
         self._mark = Marking(self._net, next_mark)
-        self._update_arc_context()
         return self._mark
 
     def marking(self):

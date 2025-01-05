@@ -29,7 +29,6 @@ class MetricsTest(PetriNetTestCase):
         net = self.net("I -> {tau__1 20.0} -> A -> {tau__2 20.0} -> F")
         self.add(net,  "I -> {tau__3 10.0} -> B -> {tau__4 10.0} -> F ")
         pi = findPlace(net,"I")
-        print(net)
         imark = singleton_marking(net, [pi])
         # selector_cost == 0            full coverage
         # trace_compression_cost == 1/30 * 

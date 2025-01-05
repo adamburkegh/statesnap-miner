@@ -32,12 +32,12 @@ def entropic_relevance(log: dict, model: LabelledPetriNet, marking: Marking,
                        loggran=DEFAULT_LOG_GRANULARITY) -> float:
     elog = enclose_traces(log)
     ltf = RoleTraceFrequency(elog)
-    print('Log TF')
-    print(ltf)
+    # print('Log TF')
+    # print(ltf)
     sem = PLPNSemantics(marking)
     wslg = WeightedTokenGameStateLogGenerator(sem,loggran)
     mtf = RoleTraceFrequency(wslg.generate())
-    print('Model TF')
-    print(mtf)
+    # print('Model TF')
+    # print(mtf)
     return relevance_uniform_roleset(ltf, mtf)
 
