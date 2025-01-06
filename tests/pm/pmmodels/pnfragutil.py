@@ -12,6 +12,14 @@ def findPlace(net,label):
             return place
 
 
+def findTransitionById(net,nodeId):
+    """
+    Return first node with this label
+    """
+    for tran in net._transitions:
+        if nodeId == tran.nodeId:
+            return tran
+
 class PetriNetTestCase(unittest.TestCase):
     def setUp(self):
         self.parser = PetriNetFragmentParser()

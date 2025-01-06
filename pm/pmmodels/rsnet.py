@@ -3,8 +3,8 @@ Structures and semantics for a Role-State nets. Role-State nets are weighted
 nets with place capacities of one and two types of transitions.
 '''
 
-from typing import Dict, Set
-from pmkoalas.models.petrinet import Transition
+from typing import Dict, Set, Iterable
+from pmkoalas.models.petrinet import Place, Transition, Arc, LabelledPetriNet
 from pm.pmmodels.plpn import Marking, singleton_marking, PetriNetSemantics
 
 
@@ -22,7 +22,20 @@ class RSTransition(Transition):
         return self._picky
 
 
+class RoleStateNet(LabelledPetriNet):
+    def __init__(self, places:Iterable[Place], transitions:Iterable[Transition],
+                 arcs:Iterable[Arc],
+                 name:str='Role-State net'):
+        for tran in transitions:
+            if not hasattr(tran,'picky'):
+                tran.picky = False
+        LabelledPetriNet.__init__(self,places,transitions,arcs,name) 
 
+def to_rsnet(net:LabelledPetriNet) -> RoleStateNet:
+    for tran in net._transitions:
+        if not hasattr(tran,'picky'):
+            tran.picky = False
+    return net
 
 class RoleStateNetSemantics(PetriNetSemantics):
     """

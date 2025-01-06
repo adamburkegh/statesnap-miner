@@ -47,10 +47,24 @@ ltf_se1 = RoleTraceFrequency(
               { (ss(['a']) ): 20, 
                 (ss(['a']), ss(['a','b'])): 10 } )
 
+ltf_se2 = RoleTraceFrequency(
+              { (ss(['I']),ss(['A']),ss(['F'])): 20,     
+                (ss(['I']),ss(['A','B']),ss(['F'])): 10,
+                (ss(['I']),ss(['B']),ss(['B','A']),ss(['F'])): 10
+               } )
 
 mtf_sa1 = RoleTraceFrequency(
               { (ss(['a','b'])): 20,     
                 (ss(['a']), ss(['a','b'])): 10 } )
+
+mtf_sa2 = RoleTraceFrequency(
+              { (ss(['I']),ss(['A']),ss(['F'])): 250,     
+                (ss(['I']),ss(['B']),ss(['F'])): 250,     
+                (ss(['I']),ss(['A','B']),ss(['F'])): 500     
+               })
+
+
+
 
 
 class EntropicRelevanceTest(unittest.TestCase):
@@ -109,18 +123,23 @@ class EntropicRelevanceTest(unittest.TestCase):
                                 relevance_uniform_roleset(ltf_se1,mtf_sa1))
         self.assertAlmostEqual( 0.9182958, selector_cost(ltf_se1,mtf_sa1) )
 
+    def test_local_eg_SA2_SE2(self):
+        self.assertAlmostEqual( 0.8112781244591328, 
+                               selector_cost(ltf_se2,mtf_sa2) )
+        self.assertAlmostEqual( 7.170606676022,
+                                relevance_uniform_roleset(ltf_se2,mtf_sa2))
+
     def show_model_cost_output(self):
-        print( f'Model TF A1') 
-        for trace in mtf_a1.traces():
-            print( f'{trace!s:30}  ... {model_cost(mtf_a1,trace)}' )
-        print( '+++' )
-        print( f'Model TF SA1') 
-        for trace in mtf_sa1.traces():
-            print( f'    {trace!s:30}  ... {model_cost(mtf_sa1,trace)}' )
-        print( f'    Roles {mtf_sa1._roles}')
-        print( '+++' )
-        print( f'Log TF E2') 
-        for trace in ltf_e2.traces():
-            print( f'{trace!s:30}  ... {model_cost(ltf_e2,trace)}' )
+        # show_model_cost(mtf_a1,'MTF A1')
+        # show_model_cost(mtf_sa1,'MTF SA1')
+        # show_model_cost(ltf_e2,'LTF E2')
+        show_model_cost(mtf_sa2,'MTF SA2')
+
+
+def show_model_cost(tf,name):
+    print( f'Model TF {name}') 
+    for trace in tf.traces():
+        print( f'{trace!s:30}  ... {model_cost(tf,trace)}' )
+    print('+++')   
 
 
