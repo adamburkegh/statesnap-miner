@@ -4,10 +4,12 @@ Mine a place-labelled SLPN from a state snapshot log.
 
 import csv
 from dataclasses import dataclass
+from itertools import chain, combinations
 from typing import Any
 from operator import attrgetter
 
 from pmkoalas.models.petrinet import *
+from pm.pmmodels.rsnet import *
 from logging import debug, info
 
 
@@ -41,6 +43,17 @@ class StateSnapshot:
     def __repr__(self):
         return f"StateSnapshot: {self.caseId} @ {self.time} = {self.activities}"
 
+
+def powerset(iterable):
+    "Subsequences of the iterable from shortest to longest."
+    #
+    # powerset([1,2,3]) → () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)
+    # From https://docs.python.org/3/library/itertools.html#itertools-recipes
+    #
+    s = list(iterable)
+    return chain.from_iterable(combinations(s, r) for r in range(len(s)+1))
+
+
 '''
 Adds transition and its connecting arcs. Returns set of arcs. 
 '''
@@ -50,7 +63,7 @@ def arcsSpanningTran(fromActs,tran,toActs,atop) -> set:
     return set(arcs)
 
 '''
-Side effect: mutates atot.
+Side effect: mutates atot and tweights.
 '''
 def addTransition(fromPlaces,toPlaces,tranId,atot,tweights) -> Transition:
     if (fromPlaces,toPlaces) in atot:
@@ -96,8 +109,8 @@ def arcSetDiff(s1,s2):
     result += f"Intersect: {s1 & s2} \n"
     return result
 
-def minePure(sslog: dict,label=None,final=True) -> LabelledPetriNet:
-    debug("mine()")
+def minePurePLPN(sslog: dict,label=None,final=True) -> LabelledPetriNet:
+    debug("minePLPN()")
     arcs = set()
     atop = {}
     atot = {}
@@ -126,7 +139,6 @@ def minePure(sslog: dict,label=None,final=True) -> LabelledPetriNet:
             newarcs = arcsSpanningTran(prevAct,tran,fact,atop)
             arcs |= newarcs
             prevAct = fact
-        # final logic goes here
         if final:
             tran = addTransition(prevAct,finalPlace.name,tranId,atot,tweights)
             tranId = max(tranId,tran.tid)
@@ -141,6 +153,75 @@ def minePure(sslog: dict,label=None,final=True) -> LabelledPetriNet:
         transitions.add(tran)
     return LabelledPetriNet( places = places, transitions = transitions, 
                              arcs = arcs, name=label )
+
+
+def minePureRoleStateNet(sslog: dict,label=None) -> RoleStateNet:
+    debug("mineRoleStateNet()")
+    arcs = set()
+    activities = set()
+    atop = {}
+    atot = {}
+    # Mutating the weight changes the hash of the transition object
+    # and Python set comparisons start breaking because the implementation
+    # caches the hash
+    tweights = {}
+    tranId = 0
+    pid = 1
+    initialPlace = Place(name='I',pid=1)
+    initRS =  frozenset([initialPlace.name])
+    atop[initialPlace.name] = initialPlace
+    pid = 2
+    finalPlace = Place(name='F',pid=pid)
+    finalPlace.final = True
+    atop[finalPlace.name] = finalPlace
+    finalRS = frozenset([finalPlace])
+    finals = {}
+    for caseId in sslog:
+        trace = sslog[caseId]
+        prevAct = None
+        for snap in trace:
+            fact = frozenset(snap.activities)
+            activities.update(fact)
+            if not prevAct:
+                prevAct = initRS
+            pid = addPlaces(atop,fact,pid)
+            tran = addTransition(prevAct,fact,tranId,atot,tweights)
+            tranId = max(tranId,tran.tid)
+            newarcs = arcsSpanningTran(prevAct,tran,fact,atop)
+            arcs |= newarcs
+            prevAct = fact
+        if prevAct in finals:
+            finals[prevAct] += 1
+        else:
+            finals[prevAct] = 1
+    placeSubsets = powerset( activities )
+    debug(f'finals {finals}')
+    for placeSubset in placeSubsets:
+        places = frozenset(placeSubset)
+        # picky transitions going to final
+        if len(places) == 0:    # skip empty set
+            continue
+        debug(f'#{places} == {len(places)}')
+        tranId += 1
+        tran = silent_transition(tid=tranId)
+        if places in finals:
+            tweights[tran] = finals[places]
+        else:
+            tweights[tran] = 1
+        atot[(places,finalRS)] = tran
+        tranId = max(tranId,tran.tid)
+        newarcs |= arcsSpanningTran(places,tran,finalPlace.name,atop)
+        arcs |= newarcs
+    places = set( atop.values() ) | set([initialPlace,finalPlace]) 
+    transitions = set()
+    debug(f'tweights {tweights}')
+    for tran in atot.values():
+        tran.weight = tweights[tran]
+        transitions.add(tran)
+    return RoleStateNet( places = places, transitions = transitions, 
+                             arcs = arcs, name=label )
+
+
 
 '''
 Prune transitions with weights below a noise threshold, their arcs, and if no arcs connecting them exist, the corresponding places.
@@ -179,13 +260,23 @@ def pruneForNoise(pnet,noiseThreshold):
     result = LabelledPetriNet(keepplaces,keeptrans,keeparcs,pnet.name)
     return result
 
-def mine(sslog: dict, label=None, noiseThreshold=0.0, final=False) \
+def minePLPN(sslog: dict, label=None, noiseThreshold=0.0, final=False) \
             -> LabelledPetriNet:
-    pnet = minePure(sslog,label,final)
+    pnet = minePurePLPN(sslog,label,final)
     if noiseThreshold > 0:
         return pruneForNoise(pnet,noiseThreshold)
     else:
         return pnet
+
+def mineRoleStateNet(sslog: dict, label=None, noiseThreshold=0.0) \
+            -> RoleStateNet:
+    pnet = minePureRoleStateNet(sslog,label)
+    if noiseThreshold > 0:
+        return pruneForNoise(pnet,noiseThreshold)
+    else:
+        return pnet
+
+mine = mineRoleStateNet
 
 
 

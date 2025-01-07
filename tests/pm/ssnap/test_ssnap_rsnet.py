@@ -1,26 +1,32 @@
 
 from itertools import zip_longest
+import logging
+from logging import debug, info
 import os.path
+import sys
 import unittest
 
 from pm.ssnap.ssnap import (StateSnapshot, sslogFromCSV, sslogWithRanges, 
-                         pruneForNoise, arcsSpanningTran)
+                         pruneForNoise, arcsSpanningTran, powerset)
 from pm.ssnap import ssnap
 from pmkoalas.models.petrinet import *
 from pmkoalas.models.pnfrag import *
-import logging
-from logging import debug, info
 from tests.pm import ssnap as tssnap
+from tests.pm.pmmodels.pnfragutil import findTransitionById
 
 mpath = os.path.abspath(tssnap.__path__[0])
 
-# logging.getLogger().setLevel(logging.DEBUG)
+logger = logging.getLogger()
+logger.level = logging.DEBUG
+stream_handler = logging.StreamHandler(sys.stdout)
+logger.addHandler(stream_handler)
+
 
 def mine(sslog):
-    return ssnap.mine(sslog,label="ssmtest")
+    return ssnap.mine(sslog,label="ssmtestrsn")
 
-def mineWithRecode(sslog,expected,final=False):
-    result = ssnap.mine(sslog,label="ssmtest",final=final)
+def mineWithRecode(sslog,expected):
+    result = ssnap.mine(sslog,label="ssmtestrsn")
     recodePlaces(result,expected)
     return result
 
@@ -48,14 +54,19 @@ def recodePlaces(netToChange,referenceNet):
         newArcs.add(newArc)
     netToChange._arcs = newArcs
     
+def makePicky(netToChange:LabelledPetriNet, tranIds:list):
+    for tranId in tranIds:
+        tran = findTransitionById(netToChange,tranId)
+        tran.picky = True
 
-class StateSnapshotMinerTest(unittest.TestCase):
+class StateSnapshotMinerRoleStateNetTest(unittest.TestCase):
 
     def setUp(self):
+        stream_handler.stream = sys.stdout
         self.parser = PetriNetFragmentParser()
 
     def net(self,netText,label=None):
-        lb = "ssmtest"
+        lb = "ssmtestrsn"
         if label:
             lb = label
         return self.parser.create_net(lb,netText)
@@ -73,31 +84,29 @@ class StateSnapshotMinerTest(unittest.TestCase):
         self.assertNetEqual(net1,net2)
 
     def test_singleton(self):
-        expected = self.net("I -> [tau__1] -> Student")
-        sslog = {1: [ StateSnapshot(1,1700,set(['Student'])) ] }
-        pn = mine(sslog)
-        self.assertNetEqual(expected,pn)
-
-    def test_singleton_final(self):
         expected = self.net("I -> [tau__1] -> Student -> [tau__2] -> F")
+        makePicky(expected,[2])
         sslog = {1: [ StateSnapshot(1,1700,set(['Student'])) ] }
-        pn = mineWithRecode(sslog,expected,final=True)
-        self.assertNetEqual(expected,pn)
-
-    def test_single_state_two_places(self):
-        expected = self.net("I -> [tau__1] -> Student")
-        self.add(expected,  "I -> [tau__1] -> Sweep")
-        sslog = {1:[ StateSnapshot(1,1700,
-                     set(['Student','Sweep'])) ]  }
         pn = mineWithRecode(sslog,expected)
         self.assertNetEqual(expected,pn)
 
-    def test_single_state_two_places_final(self):
+    def test_singleton_trace_variant(self):
+        expected = self.net("I -> {tau__1 2.0} -> Student -> {tau__2 2.0} -> F")
+        makePicky(expected,[2])
+        sslog = {1: [ StateSnapshot(1,1700,set(['Student'])) ],
+                 2: [ StateSnapshot(1,1700,set(['Student'])) ],}
+        pn = mineWithRecode(sslog,expected)
+        self.assertNetEqual(expected,pn)
+
+    def test_single_state_two_places(self):
         expected = self.net("I -> [tau__1] -> Student -> [tau__2] -> F")
         self.add(expected,  "I -> [tau__1] -> Sweep   -> [tau__2] -> F")
+        self.add(expected,                   "Student -> [tau__3] -> F")
+        self.add(expected,                   "Sweep   -> [tau__4] -> F")
+        makePicky(expected,[2,3,4])
         sslog = {1: [ StateSnapshot(1,1700,
                       set(['Student','Sweep'])) ]  }
-        pn = mineWithRecode(sslog,expected,final=True)
+        pn = mineWithRecode(sslog,expected)
         self.assertNetEqual(expected,pn)
 
     def test_one_case_two_seq_states(self):
@@ -105,14 +114,24 @@ class StateSnapshotMinerTest(unittest.TestCase):
                            set(['Sweep'])) ,
                       StateSnapshot(1,1701,
                            set(['Student']) ) ] } 
-        pn = mine(sslog)
-        expected = self.net("I -> [tau__1] -> Sweep -> [tau__2] -> Student")
+        expected = self.net(
+            "I -> [tau__1] -> Sweep -> [tau__2] -> Student -> [tau__4] -> F")
+        self.add(expected,                   "Sweep -> [tau__3] -> F")
+        self.add(expected,                   "Sweep -> [tau__5] -> F")
+        self.add(expected,                 "Student -> [tau__5] -> F")
+        makePicky(expected,[3,4,5])
+        pn = mineWithRecode(sslog,expected)
         self.assertNetEqual(expected,pn)
 
 
     def test_two_cases_two_states(self):
         expected = self.net("I -> [tau__1] -> Sweep")
         self.add(expected,  "I -> [tau__2] -> Student")
+        self.add(expected,                   "Sweep -> [tau__3] -> F")
+        self.add(expected,                 "Student -> [tau__4] -> F")
+        self.add(expected,                   "Sweep -> [tau__5] -> F")
+        self.add(expected,                 "Student -> [tau__5] -> F")
+        makePicky(expected,[3,4,5])
         sslog = {1: [ StateSnapshot(1,1700,
                                     set(['Sweep']))],
                  2: [ StateSnapshot(2,1701,
@@ -124,6 +143,11 @@ class StateSnapshotMinerTest(unittest.TestCase):
         expected = self.net("I -> [tau__1] -> Student")
         self.add(expected,  "Student -> [tau__2] -> Student")
         self.add(expected,  "Student -> [tau__2] -> Sweep")
+        self.add(expected,  "Student -> [tau__3] -> F")
+        self.add(expected,    "Sweep -> [tau__4] -> F")
+        self.add(expected,  "Student -> [tau__5] -> F")
+        self.add(expected,    "Sweep -> [tau__5] -> F")
+        makePicky(expected,[3,4,5])
         sslog = {1: [ StateSnapshot(1,1700,
                                     set(['Student'])) ,
                       StateSnapshot(1,1701,
@@ -138,6 +162,10 @@ class StateSnapshotMinerTest(unittest.TestCase):
         self.add(expected,  "Student -> [tau__2] -> Sweep")
         self.add(expected,  "Student -> [tau__3] -> Student")
         self.add(expected,  "Sweep   -> [tau__3] -> Student")
+        self.add(expected,  "Student -> [tau__4] -> F")
+        self.add(expected,    "Sweep -> [tau__5] -> F")
+        self.add(expected,  "Student -> [tau__6] -> F")
+        self.add(expected,    "Sweep -> [tau__6] -> F")
         sslog = {1: [ StateSnapshot(1,1700,
                                     set(['Student'])) ,
                       StateSnapshot(1,1701,
@@ -149,8 +177,14 @@ class StateSnapshotMinerTest(unittest.TestCase):
 
 
     def test_multi_cases_weight(self):
-        expected = self.net("I -> {tau__1 1.0} -> Student")
-        self.add(expected,  "I -> {tau__2 3.0} -> Sweep")
+        expected = self.net(
+                "I -> {tau__1 1.0} -> Student")
+        self.add(expected,  
+                "I -> {tau__2 3.0} -> Sweep")
+        self.add(expected,           "Student -> [tau__3] -> F")
+        self.add(expected,             "Sweep -> {tau__4 3.0} -> F")
+        self.add(expected,           "Student -> [tau__5] -> F")
+        self.add(expected,             "Sweep -> [tau__5] -> F")
         sslog = {1: [ StateSnapshot(1,1700,
                                     set(['Student'])) ],
                  2: [ StateSnapshot(2,1701,
@@ -171,6 +205,91 @@ class StateSnapshotMinerTest(unittest.TestCase):
         self.add(expected,  "Student -> [tau__4] -> Tutor")
         self.add(expected,  "Student -> [tau__5] -> Drone")
         self.add(expected,  "Tutor   -> [tau__5] -> Drone")
+        #
+        self.add(expected,  "Student -> [tau__6] -> F")
+        self.add(expected,    "Sweep -> [tau__7] -> F")
+        self.add(expected,  "Bludger -> [tau__8] -> F")
+        self.add(expected,    "Drone -> [tau__9] -> F")
+        self.add(expected,    "Tutor -> [tau__10] -> F")
+        #
+        self.add(expected,  "Student -> [tau__11] -> F")
+        self.add(expected,    "Sweep -> [tau__11] -> F")
+        self.add(expected,  "Student -> [tau__12] -> F")
+        self.add(expected,  "Bludger -> [tau__12] -> F")
+        self.add(expected,  "Student -> [tau__13] -> F")
+        self.add(expected,    "Drone -> [tau__13] -> F")
+        self.add(expected,  "Student -> [tau__14] -> F")
+        self.add(expected,    "Tutor -> [tau__14] -> F")
+        self.add(expected,    "Sweep -> [tau__15] -> F")
+        self.add(expected,  "Bludger -> [tau__15] -> F")
+        self.add(expected,    "Sweep -> [tau__16] -> F")
+        self.add(expected,    "Drone -> [tau__16] -> F")
+        self.add(expected,    "Sweep -> [tau__17] -> F")
+        self.add(expected,    "Tutor -> [tau__17] -> F")
+        self.add(expected,  "Bludger -> [tau__18] -> F")
+        self.add(expected,    "Drone -> [tau__18] -> F")
+        self.add(expected,  "Bludger -> [tau__19] -> F")
+        self.add(expected,    "Tutor -> [tau__19] -> F")
+        self.add(expected,    "Drone -> [tau__20] -> F")
+        self.add(expected,    "Tutor -> [tau__20] -> F")
+        #
+        self.add(expected,  "Student -> [tau__21] -> F")
+        self.add(expected,    "Sweep -> [tau__21] -> F")
+        self.add(expected,  "Bludger -> [tau__21] -> F")
+        self.add(expected,  "Student -> [tau__22] -> F")
+        self.add(expected,    "Sweep -> [tau__22] -> F")
+        self.add(expected,    "Drone -> [tau__22] -> F")
+        self.add(expected,  "Student -> [tau__23] -> F")
+        self.add(expected,    "Sweep -> [tau__23] -> F")
+        self.add(expected,    "Tutor -> [tau__23] -> F")
+        self.add(expected,  "Student -> [tau__24] -> F")
+        self.add(expected,  "Bludger -> [tau__24] -> F")
+        self.add(expected,    "Drone -> [tau__24] -> F")
+        self.add(expected,  "Student -> [tau__25] -> F")
+        self.add(expected,  "Bludger -> [tau__25] -> F")
+        self.add(expected,    "Tutor -> [tau__25] -> F")
+        self.add(expected,  "Student -> [tau__26] -> F")
+        self.add(expected,    "Drone -> [tau__26] -> F")       
+        self.add(expected,    "Tutor -> [tau__26] -> F")
+        self.add(expected,    "Sweep -> [tau__27] -> F")
+        self.add(expected,  "Bludger -> [tau__27] -> F")
+        self.add(expected,    "Drone -> [tau__27] -> F")
+        self.add(expected,    "Sweep -> [tau__28] -> F")
+        self.add(expected,  "Bludger -> [tau__28] -> F")
+        self.add(expected,    "Tutor -> [tau__28] -> F")
+        self.add(expected,    "Sweep -> [tau__29] -> F")
+        self.add(expected,    "Drone -> [tau__29] -> F")
+        self.add(expected,    "Tutor -> [tau__29] -> F")
+        self.add(expected,  "Bludger -> [tau__30] -> F")
+        self.add(expected,    "Drone -> [tau__30] -> F")
+        self.add(expected,    "Tutor -> [tau__30] -> F")
+        #
+        self.add(expected,  "Student -> [tau__31] -> F")
+        self.add(expected,    "Sweep -> [tau__31] -> F")
+        self.add(expected,  "Bludger -> [tau__31] -> F")
+        self.add(expected,    "Drone -> [tau__31] -> F")
+        self.add(expected,  "Student -> [tau__32] -> F")
+        self.add(expected,    "Sweep -> [tau__32] -> F")
+        self.add(expected,  "Bludger -> [tau__32] -> F")
+        self.add(expected,    "Tutor -> [tau__32] -> F")
+        self.add(expected,  "Student -> [tau__33] -> F")
+        self.add(expected,    "Sweep -> [tau__33] -> F")
+        self.add(expected,    "Drone -> [tau__33] -> F")
+        self.add(expected,    "Tutor -> [tau__33] -> F")
+        self.add(expected,  "Student -> [tau__34] -> F")
+        self.add(expected,  "Bludger -> [tau__34] -> F")
+        self.add(expected,    "Drone -> [tau__34] -> F")
+        self.add(expected,    "Tutor -> [tau__34] -> F")
+        self.add(expected,    "Sweep -> [tau__35] -> F")
+        self.add(expected,  "Bludger -> [tau__35] -> F")
+        self.add(expected,    "Drone -> [tau__35] -> F")
+        self.add(expected,    "Tutor -> [tau__35] -> F")
+        #
+        self.add(expected,  "Student -> [tau__36] -> F")
+        self.add(expected,    "Sweep -> [tau__36] -> F")
+        self.add(expected,  "Bludger -> [tau__36] -> F")
+        self.add(expected,    "Drone -> [tau__36] -> F")
+        self.add(expected,    "Tutor -> [tau__36] -> F")
         sslog = {1: [ StateSnapshot(1,1700,
                                     set(['Student'])) ,
                       StateSnapshot(1,1701,
@@ -186,7 +305,8 @@ class StateSnapshotMinerTest(unittest.TestCase):
                       StateSnapshot(3,1710,
                                     set(['Drone']) ) ] }   
         pn = mineWithRecode(sslog,expected)
-        arcdebug(expected,pn) 
+        makePicky(expected,range(6,37))
+        self.assertEqual( expected._transitions, pn._transitions)
         self.assertNetEqual(expected,pn)
 
     def test_tran_mutation_in_set(self):
@@ -199,9 +319,10 @@ class StateSnapshotMinerTest(unittest.TestCase):
                      StateSnapshot(2,1893.75, {'Senior Compiler'})]    }
         # have to avoid recode as it will hide the set issue
         result = mine(sslog)
-        self.assertEqual(len( result.arcs ), 8) 
-        self.assertEqual(len( result.transitions ), 3) 
-        self.assertEqual(len( result.places ), 3) 
+        # Note this includes the picky transitions and the final place
+        self.assertEqual(len( result.arcs ), 15) 
+        self.assertEqual(len( result.transitions ), 6) 
+        self.assertEqual(len( result.places ), 4) 
 
 
     def test_sslog_from_csv(self):
@@ -301,6 +422,7 @@ class StateSnapshotMinerTest(unittest.TestCase):
         self.assertEqual(arcExp,result)
         self.assertEqual(arcExp,arcExp | result)
 
+
 def arcdebug(net1,net2):
     sitems1 = sorted(net1.arcs, 
                      key=lambda arc: (arc.from_node.name,arc.to_node.name ) ) 
@@ -312,5 +434,15 @@ def arcdebug(net1,net2):
     debug("")
 
 
+
+if __name__ == '__main__':
+    tr = unittest.TextTestRunner()
+    module = __import__(__name__)
+    for part in __name__.split('.')[1:]:
+        module = getattr(module, part)
+    loader = unittest.defaultTestLoader
+    loader.testMethodPrefix = 'test_singleton_trace_variant'
+    tests = loader.loadTestsFromModule( module )
+    tr.run( tests )
 
 

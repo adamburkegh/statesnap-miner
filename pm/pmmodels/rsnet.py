@@ -21,6 +21,14 @@ class RSTransition(Transition):
     def picky(self):
         return self._picky
 
+    def __eq__(self,other):
+        return Transition.__eq__(self,other) \
+                and self._picky == other._picky
+
+    def __hash__(self) -> int:
+        return hash((self._name,self._tid,self._weight,self._silent,
+                     self._picky))
+
 
 class RoleStateNet(LabelledPetriNet):
     def __init__(self, places:Iterable[Place], transitions:Iterable[Transition],
