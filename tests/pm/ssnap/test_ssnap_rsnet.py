@@ -435,6 +435,7 @@ def arcdebug(net1,net2):
 
 
 
+# Allows logging to work while running single tests
 if __name__ == '__main__':
     tr = unittest.TextTestRunner()
     module = __import__(__name__)
