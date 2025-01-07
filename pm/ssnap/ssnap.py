@@ -5,13 +5,16 @@ Mine a place-labelled SLPN from a state snapshot log.
 import csv
 from dataclasses import dataclass
 from itertools import chain, combinations
+import logging
 from typing import Any
 from operator import attrgetter
 
 from pmkoalas.models.petrinet import *
 from pm.pmmodels.rsnet import *
-from logging import debug, info
+# from logging import debug, info
 
+logger = logging.getLogger(__name__)
+debug, info = logger.debug, logger.info
 
 
 class StateSnapshot:
@@ -195,13 +198,15 @@ def minePureRoleStateNet(sslog: dict,label=None) -> RoleStateNet:
         else:
             finals[prevAct] = 1
     placeSubsets = powerset( activities )
+    debug(f'activities {len(activities)}')
+    debug(f'placeSubsets {len(set(placeSubsets))}')
     debug(f'finals {finals}')
     for placeSubset in placeSubsets:
         places = frozenset(placeSubset)
         # picky transitions going to final
         if len(places) == 0:    # skip empty set
             continue
-        debug(f'#{places} == {len(places)}')
+        # debug(f'#{places} == {len(places)}')
         tranId += 1
         tran = silent_transition(tid=tranId)
         if places in finals:

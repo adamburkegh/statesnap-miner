@@ -3,9 +3,12 @@ Example using the state snapshot miner on publicly released 1850-1864 data for
 Tier 1 officials.
 '''
 
-import ssnap.ssnap as snapminer
+import pm.ssnap.ssnap as snapminer
 from cgedq.mine import mineByTime
-from pmmodels.pnformatter import exportNetToScaledImage
+from pm.pmmodels.pnformatter import exportNetToScaledImage
+
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 logfile = 'data/cged-q-zyjtnall_1850-1864.csv'
 
