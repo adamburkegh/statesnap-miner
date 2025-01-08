@@ -48,13 +48,17 @@ class StateSnapshot:
 
 
 def powerset(iterable):
-    "Subsequences of the iterable from shortest to longest."
+    """
+    Subsequences of the iterable from shortest to longest. Each subsequence is
+    also sorted to aid reproducibility.
+    """
     #
     # powerset([1,2,3]) → () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)
     # From https://docs.python.org/3/library/itertools.html#itertools-recipes
     #
     s = list(iterable)
-    return chain.from_iterable(combinations(s, r) for r in range(len(s)+1))
+    return [tuple(sorted(x)) for x in \
+            chain.from_iterable(combinations(s, r) for r in range(len(s)+1))]
 
 
 '''
@@ -197,10 +201,10 @@ def minePureRoleStateNet(sslog: dict,label=None) -> RoleStateNet:
             finals[prevAct] += 1
         else:
             finals[prevAct] = 1
-    placeSubsets = powerset( activities )
-    debug(f'activities {len(activities)}')
-    debug(f'placeSubsets {len(set(placeSubsets))}')
-    debug(f'finals {finals}')
+    placeSubsets = sorted(powerset( activities ))
+    # debug(f'activities {len(activities)}')
+    # debug(f'placeSubsets {len(set(placeSubsets))} {placeSubsets}')
+    # debug(f'finals {finals}')
     for placeSubset in placeSubsets:
         places = frozenset(placeSubset)
         # picky transitions going to final

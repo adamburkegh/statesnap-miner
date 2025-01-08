@@ -17,7 +17,7 @@ from tests.pm.pmmodels.pnfragutil import findTransitionById
 mpath = os.path.abspath(tssnap.__path__[0])
 
 logger = logging.getLogger()
-logger.level = logging.DEBUG
+# logger.level = logging.DEBUG
 stream_handler = logging.StreamHandler(sys.stdout)
 logger.addHandler(stream_handler)
 
@@ -182,9 +182,9 @@ class StateSnapshotMinerRoleStateNetTest(unittest.TestCase):
         self.add(expected,  
                 "I -> {tau__2 3.0} -> Sweep")
         self.add(expected,           "Student -> [tau__3] -> F")
-        self.add(expected,             "Sweep -> {tau__4 3.0} -> F")
-        self.add(expected,           "Student -> [tau__5] -> F")
-        self.add(expected,             "Sweep -> [tau__5] -> F")
+        self.add(expected,           "Student -> [tau__4] -> F")
+        self.add(expected,             "Sweep -> [tau__4] -> F")
+        self.add(expected,             "Sweep -> {tau__5 3.0} -> F")
         sslog = {1: [ StateSnapshot(1,1700,
                                     set(['Student'])) ],
                  2: [ StateSnapshot(2,1701,
@@ -442,7 +442,7 @@ if __name__ == '__main__':
     for part in __name__.split('.')[1:]:
         module = getattr(module, part)
     loader = unittest.defaultTestLoader
-    loader.testMethodPrefix = 'test_singleton_trace_variant'
+    loader.testMethodPrefix = 'test_multi_cases_weight'
     tests = loader.loadTestsFromModule( module )
     tr.run( tests )
 
