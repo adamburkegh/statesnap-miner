@@ -1,4 +1,5 @@
 
+from typing import Tuple
 import unittest
 
 from pmkoalas.models.pnfrag import *
@@ -11,6 +12,11 @@ def findPlace(net,label):
         if label == place.name:
             return place
 
+def findPlaces(net,*labels) -> Tuple:
+    """
+    Return first node with this label
+    """
+    return tuple([findPlace(net,label) for label in labels])
 
 def findTransitionById(net,nodeId):
     """
