@@ -19,7 +19,9 @@ from cgedq.logutil import *
 
 from pmkoalas.models.petrinet import LabelledPetriNet
 from pmkoalas.models.dotutil import dot_to_img, export_DOT_to_image
-from pm.pmmodels.pnformatter import ScaledFormatter, exportNetToScaledImage
+from pm.pmmodels.pnformatter \
+        import (ScaledFormatter, exportNetToScaledImage, 
+                exportRoleStateNetToImage )
 import pm.pmmodels.pm4pyviz
 from pm.ssnap.ssnap import mine, sslogFromCSV, sslogWithRanges, reportLogStats
 
@@ -153,7 +155,10 @@ def mineByTime(vard,fname,sslog:set,years:int,noise=0.0,font=None):
     pn = mine(sslogn,noiseThreshold=noise)
     tsum = sum([tran.weight for tran in pn.transitions])
     info(f'Total weights: {tsum} ... weight threshold: {noise*tsum}')
-    exportNetToScaledImage(vard,
+    #exportNetToScaledImage(vard,
+    #        f"{fname}_n{10000*noise:04.0f}_ss{str(years).zfill(3)}y",pn,sslog,
+    #        font)
+    exportRoleStateNetToImage(vard,
             f"{fname}_n{10000*noise:04.0f}_ss{str(years).zfill(3)}y",pn,sslog,
             font)
     # exportNetToImage(vard,f"{fname}_ss{str(years).zfill(3)}y",pn)

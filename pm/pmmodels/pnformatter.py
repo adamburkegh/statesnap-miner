@@ -1,10 +1,17 @@
 
+import logging
+from logging import debug
 import math
-from pmkoalas.models.petrinet import PetriNetDOTFormatter
+from pmkoalas.models.petrinet import PetriNetDOTFormatter, Arc, Transition
 # from pmkoalas.models.dotutil import export_DOT_to_image
-## local cut and paste fork
+## Includes local cut and paste fork elements
+## Also has RoleStateNet specific elements 
 from pm.pmmodels.dotutil import export_DOT_to_image
+from pm.pmmodels.rsnet import RoleStateNet
 
+
+logger = logging.getLogger(__name__)
+debug, info = logger.debug, logger.info
 
 class ScaledFormatter(PetriNetDOTFormatter):
     # These sizes should probably be relative instead of absolute
@@ -61,6 +68,7 @@ class ScaledFormatter(PetriNetDOTFormatter):
         return fstr
 
     def transform_arc(self,arc):
+        #debug(f'transform_arc({arc})')
         from_node = self._nodemap[arc.from_node]
         to_node = self._nodemap[arc.to_node]
         weight = 1
@@ -72,6 +80,97 @@ class ScaledFormatter(PetriNetDOTFormatter):
         return f'n{from_node}->n{to_node}[penwidth="{asize}"]\n'
 
 
+INITIAL_NAME = 'I'
+FINAL_NAME = 'F'
+
+def picky_arc(arc:Arc) -> bool:
+    # print(f'picky_arc({arc})')
+    return  (isinstance(arc.to_node,Transition) and arc.to_node.picky ) or \
+            (isinstance(arc.from_node,Transition) and arc.from_node.picky ) 
+
+
+class RoleStateNetFormatter(ScaledFormatter):
+    # These sizes should probably be relative instead of absolute
+
+    def __init__(self,pn:RoleStateNet,sslog:dict,font='SimSun',
+                 termination_weights=True,
+                 initial_name = INITIAL_NAME, final_name=FINAL_NAME):
+        super().__init__(pn,sslog,font)
+        self._termination_weights = termination_weights
+        self._initial_name = initial_name
+        self._final_name = final_name
+        self._fontsize = 14
+
+    def prelude(self) -> str:
+        dotstr = 'digraph G{\n'
+        dotstr += f'ranksep=".3"; fontsize="14"; remincross=true; margin="0.0,0.0"; fontname="{self._font}";rankdir="LR";charset=utf8;\n'
+        dotstr += 'edge [arrowsize="0.5"];\n'
+        dotstr += f'node [height="{self._default_height}",width="{self._default_height}",fontname="{self._font}"'
+        dotstr += f',fontsize="{self._fontsize}"];\n'
+        dotstr += 'ratio=0.4;\n'
+        return dotstr
+
+    def transform_picky_arcs(self,picky_arcs,ni) -> str:
+        if len(picky_arcs) == 0:
+            return ""
+        fstr =  f'n{str(ni)} [shape="none",margin="0",'
+        fstr += f'label=<<table>\n'
+        fstr += '<th><td>Roles</td><td>Termination Weight</td></th>'
+        tran_incoming = {}
+        for arc in picky_arcs:
+            if isinstance(arc.to_node,Transition):
+                tran = arc.to_node
+                if tran in tran_incoming:
+                    tran_incoming[tran].append(arc.from_node)
+                else:
+                    tran_incoming[tran] = [arc.from_node]
+        for tran in tran_incoming:
+            fstr += '<tr><td align="left">'
+            for place in tran_incoming[tran]:
+                fstr += f'{place.name}; '
+            fstr += f'</td><td align="right">{tran.weight}</td></tr>\n'
+        fstr += '</table>>];\n'
+        return fstr
+
+    def transform_net(self) -> str:
+        debug('RoleStateNetFormatter.transform_net()')
+        dotstr = self.prelude()
+        ni = 1
+        #debug('   places')
+        initialPlace = None
+        for pl in self._pn.places:
+            if pl.name == INITIAL_NAME:
+                initialPlace = pl
+            if pl.name == self._final_name:
+                continue
+            ni += 1
+            self._nodemap[pl] = ni
+            dotstr += self.transform_place(pl,ni)
+        #debug('   transitions')
+        for tr in self._pn.transitions:
+            if tr.picky:
+                continue
+            ni += 1
+            self._nodemap[tr] = ni
+            dotstr += self.transform_transition(tr,ni)
+        # debug(f'{self._nodemap}')
+        picky_arcs = []
+        for ar in self._pn.arcs:
+            if picky_arc(ar):
+                picky_arcs.append(ar)
+                continue
+            dotstr += self.transform_arc(ar)
+        if self._termination_weights:
+            ni += 1
+            dotstr += self.transform_picky_arcs(picky_arcs,ni)
+            finalWeightNode = ni
+            initNi = self._nodemap[initialPlace]
+            dotstr += f'n{finalWeightNode}->n{initNi} [style=invis];\n'
+        dotstr += '}\n'
+        return dotstr
+
+
+
 def exportToScaledDOT(net,sslog: set,font) -> str:
     return ScaledFormatter(net,sslog,font).transform_net()
 
@@ -80,5 +179,12 @@ def exportNetToScaledImage(vard,oname,pn,sslog,font):
     dotStr = exportToScaledDOT(pn,sslog,font)
     export_DOT_to_image(vard,oname,dotStr) 
 
+def exportRoleStateNetDOT(net,sslog,font) -> str:
+    return RoleStateNetFormatter(net,sslog,font,
+                                 termination_weights=False).transform_net()
+
+def exportRoleStateNetToImage(vard,oname,pn,sslog,font):
+    dotStr = exportRoleStateNetDOT(pn,sslog,font)
+    export_DOT_to_image(vard,oname,dotStr) 
 
 

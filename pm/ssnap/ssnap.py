@@ -224,6 +224,7 @@ def minePureRoleStateNet(sslog: dict,label=None) -> RoleStateNet:
             continue
         tranId += 1
         tran = silent_transition(tid=tranId)
+        tran.picky = True
         fPlaceNames = frozenset(placeNames)
         if fPlaceNames in finals:
             tweights[tran] = finals[fPlaceNames]

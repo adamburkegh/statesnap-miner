@@ -8,7 +8,8 @@ from cgedq.mine import mineByTime
 from pm.pmmodels.pnformatter import exportNetToScaledImage
 
 import logging
-logging.basicConfig(level=logging.DEBUG)
+#logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 logfile = 'data/cged-q-zyjtnall_1850-1864.csv'
 
