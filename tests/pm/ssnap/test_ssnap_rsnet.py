@@ -12,7 +12,7 @@ from pm.ssnap import ssnap
 from pmkoalas.models.petrinet import *
 from pmkoalas.models.pnfrag import *
 from tests.pm import ssnap as tssnap
-from tests.pm.pmmodels.pnfragutil import findTransitionById
+from tests.pm.pmmodels.pnfragutil import findTransitionById, findPlaces
 
 mpath = os.path.abspath(tssnap.__path__[0])
 
@@ -30,6 +30,9 @@ def mineWithRecode(sslog,expected):
     recodePlaces(result,expected)
     return result
 
+def arckey(arc):
+    return (type(arc.to_node) == Place, arc.from_node.name, arc.to_node.name) 
+
 def recodePlaces(netToChange,referenceNet):
     '''
     For each place in netToChange, look up the place by name in referenceNet,
@@ -41,7 +44,7 @@ def recodePlaces(netToChange,referenceNet):
     extraPlaces = [p for p in netToChange.places if not p.name in newPlaces]
     netToChange._places = set( newPlaces.values() ) | set(extraPlaces)
     newArcs = set()
-    for arc in netToChange.arcs:
+    for arc in sorted(netToChange.arcs,key=arckey):
         newArc = arc
         if isinstance(arc.from_node,Place) and arc.from_node.name in newPlaces:
             newPlace = newPlaces[arc.from_node.name]
@@ -96,14 +99,13 @@ class StateSnapshotMinerRoleStateNetTest(unittest.TestCase):
         sslog = {1: [ StateSnapshot(1,1700,set(['Student'])) ],
                  2: [ StateSnapshot(1,1700,set(['Student'])) ],}
         pn = mineWithRecode(sslog,expected)
+        arcdebug(expected,pn)
         self.assertNetEqual(expected,pn)
 
     def test_single_state_two_places(self):
         expected = self.net("I -> [tau__1] -> Student -> [tau__2] -> F")
         self.add(expected,  "I -> [tau__1] -> Sweep   -> [tau__2] -> F")
-        self.add(expected,                   "Student -> [tau__3] -> F")
-        self.add(expected,                   "Sweep   -> [tau__4] -> F")
-        makePicky(expected,[2,3,4])
+        makePicky(expected,[2])
         sslog = {1: [ StateSnapshot(1,1700,
                       set(['Student','Sweep'])) ]  }
         pn = mineWithRecode(sslog,expected)
@@ -117,9 +119,7 @@ class StateSnapshotMinerRoleStateNetTest(unittest.TestCase):
         expected = self.net(
             "I -> [tau__1] -> Sweep -> [tau__2] -> Student -> [tau__4] -> F")
         self.add(expected,                   "Sweep -> [tau__3] -> F")
-        self.add(expected,                   "Sweep -> [tau__5] -> F")
-        self.add(expected,                 "Student -> [tau__5] -> F")
-        makePicky(expected,[3,4,5])
+        makePicky(expected,[3,4])
         pn = mineWithRecode(sslog,expected)
         self.assertNetEqual(expected,pn)
 
@@ -129,9 +129,7 @@ class StateSnapshotMinerRoleStateNetTest(unittest.TestCase):
         self.add(expected,  "I -> [tau__2] -> Student")
         self.add(expected,                   "Sweep -> [tau__3] -> F")
         self.add(expected,                 "Student -> [tau__4] -> F")
-        self.add(expected,                   "Sweep -> [tau__5] -> F")
-        self.add(expected,                 "Student -> [tau__5] -> F")
-        makePicky(expected,[3,4,5])
+        makePicky(expected,[3,4])
         sslog = {1: [ StateSnapshot(1,1700,
                                     set(['Sweep']))],
                  2: [ StateSnapshot(2,1701,
@@ -144,10 +142,9 @@ class StateSnapshotMinerRoleStateNetTest(unittest.TestCase):
         self.add(expected,  "Student -> [tau__2] -> Student")
         self.add(expected,  "Student -> [tau__2] -> Sweep")
         self.add(expected,  "Student -> [tau__3] -> F")
+        self.add(expected,  "Student -> [tau__4] -> F")
         self.add(expected,    "Sweep -> [tau__4] -> F")
-        self.add(expected,  "Student -> [tau__5] -> F")
-        self.add(expected,    "Sweep -> [tau__5] -> F")
-        makePicky(expected,[3,4,5])
+        makePicky(expected,[3,4])
         sslog = {1: [ StateSnapshot(1,1700,
                                     set(['Student'])) ,
                       StateSnapshot(1,1701,
@@ -163,9 +160,8 @@ class StateSnapshotMinerRoleStateNetTest(unittest.TestCase):
         self.add(expected,  "Student -> [tau__3] -> Student")
         self.add(expected,  "Sweep   -> [tau__3] -> Student")
         self.add(expected,  "Student -> [tau__4] -> F")
+        self.add(expected,  "Student -> [tau__5] -> F")
         self.add(expected,    "Sweep -> [tau__5] -> F")
-        self.add(expected,  "Student -> [tau__6] -> F")
-        self.add(expected,    "Sweep -> [tau__6] -> F")
         sslog = {1: [ StateSnapshot(1,1700,
                                     set(['Student'])) ,
                       StateSnapshot(1,1701,
@@ -182,9 +178,7 @@ class StateSnapshotMinerRoleStateNetTest(unittest.TestCase):
         self.add(expected,  
                 "I -> {tau__2 3.0} -> Sweep")
         self.add(expected,           "Student -> [tau__3] -> F")
-        self.add(expected,           "Student -> [tau__4] -> F")
-        self.add(expected,             "Sweep -> [tau__4] -> F")
-        self.add(expected,             "Sweep -> {tau__5 3.0} -> F")
+        self.add(expected,             "Sweep -> {tau__4 3.0} -> F")
         sslog = {1: [ StateSnapshot(1,1700,
                                     set(['Student'])) ],
                  2: [ StateSnapshot(2,1701,
@@ -206,90 +200,40 @@ class StateSnapshotMinerRoleStateNetTest(unittest.TestCase):
         self.add(expected,  "Student -> [tau__5] -> Drone")
         self.add(expected,  "Tutor   -> [tau__5] -> Drone")
         #
-        self.add(expected,  "Student -> [tau__6] -> F")
-        self.add(expected,    "Sweep -> [tau__7] -> F")
-        self.add(expected,  "Bludger -> [tau__8] -> F")
-        self.add(expected,    "Drone -> [tau__9] -> F")
-        self.add(expected,    "Tutor -> [tau__10] -> F")
+        # self.add(expected,    "Sweep -> [tau__7] -> F")
+        self.add(expected,  "Bludger -> [tau__6] -> F")
+        self.add(expected,    "Drone -> [tau__7] -> F")
+        self.add(expected,  "Student -> [tau__8] -> F")
+        # self.add(expected,    "Tutor -> [tau__10] -> F")
         #
+        self.add(expected,  "Bludger -> [tau__9] -> F")
+        self.add(expected,    "Sweep -> [tau__9] -> F")
+        self.add(expected,  "Student -> [tau__10] -> F")
+        self.add(expected,    "Sweep -> [tau__10] -> F")
+        #self.add(expected,  "Student -> [tau__12] -> F")
+        #self.add(expected,  "Bludger -> [tau__12] -> F")
+        #self.add(expected,  "Student -> [tau__13] -> F")
+        #self.add(expected,    "Drone -> [tau__13] -> F")
         self.add(expected,  "Student -> [tau__11] -> F")
-        self.add(expected,    "Sweep -> [tau__11] -> F")
-        self.add(expected,  "Student -> [tau__12] -> F")
-        self.add(expected,  "Bludger -> [tau__12] -> F")
-        self.add(expected,  "Student -> [tau__13] -> F")
-        self.add(expected,    "Drone -> [tau__13] -> F")
-        self.add(expected,  "Student -> [tau__14] -> F")
+        self.add(expected,    "Tutor -> [tau__11] -> F")
+        self.add(expected,    "Drone -> [tau__12] -> F")
+        self.add(expected,    "Sweep -> [tau__12] -> F")
+        #self.add(expected,    "Sweep -> [tau__17] -> F")
+        #self.add(expected,    "Tutor -> [tau__17] -> F")
+        #self.add(expected,  "Bludger -> [tau__18] -> F")
+        #self.add(expected,    "Drone -> [tau__18] -> F")
+        self.add(expected,  "Bludger -> [tau__13] -> F")
+        self.add(expected,    "Tutor -> [tau__13] -> F")
+        #self.add(expected,    "Drone -> [tau__20] -> F")
+        #self.add(expected,    "Tutor -> [tau__20] -> F")
+        #
+        self.add(expected,  "Bludger -> [tau__14] -> F")
+        self.add(expected,    "Sweep -> [tau__14] -> F")
         self.add(expected,    "Tutor -> [tau__14] -> F")
+        self.add(expected,  "Student -> [tau__15] -> F")
         self.add(expected,    "Sweep -> [tau__15] -> F")
-        self.add(expected,  "Bludger -> [tau__15] -> F")
-        self.add(expected,    "Sweep -> [tau__16] -> F")
-        self.add(expected,    "Drone -> [tau__16] -> F")
-        self.add(expected,    "Sweep -> [tau__17] -> F")
-        self.add(expected,    "Tutor -> [tau__17] -> F")
-        self.add(expected,  "Bludger -> [tau__18] -> F")
-        self.add(expected,    "Drone -> [tau__18] -> F")
-        self.add(expected,  "Bludger -> [tau__19] -> F")
-        self.add(expected,    "Tutor -> [tau__19] -> F")
-        self.add(expected,    "Drone -> [tau__20] -> F")
-        self.add(expected,    "Tutor -> [tau__20] -> F")
+        self.add(expected,    "Tutor -> [tau__15] -> F")
         #
-        self.add(expected,  "Student -> [tau__21] -> F")
-        self.add(expected,    "Sweep -> [tau__21] -> F")
-        self.add(expected,  "Bludger -> [tau__21] -> F")
-        self.add(expected,  "Student -> [tau__22] -> F")
-        self.add(expected,    "Sweep -> [tau__22] -> F")
-        self.add(expected,    "Drone -> [tau__22] -> F")
-        self.add(expected,  "Student -> [tau__23] -> F")
-        self.add(expected,    "Sweep -> [tau__23] -> F")
-        self.add(expected,    "Tutor -> [tau__23] -> F")
-        self.add(expected,  "Student -> [tau__24] -> F")
-        self.add(expected,  "Bludger -> [tau__24] -> F")
-        self.add(expected,    "Drone -> [tau__24] -> F")
-        self.add(expected,  "Student -> [tau__25] -> F")
-        self.add(expected,  "Bludger -> [tau__25] -> F")
-        self.add(expected,    "Tutor -> [tau__25] -> F")
-        self.add(expected,  "Student -> [tau__26] -> F")
-        self.add(expected,    "Drone -> [tau__26] -> F")       
-        self.add(expected,    "Tutor -> [tau__26] -> F")
-        self.add(expected,    "Sweep -> [tau__27] -> F")
-        self.add(expected,  "Bludger -> [tau__27] -> F")
-        self.add(expected,    "Drone -> [tau__27] -> F")
-        self.add(expected,    "Sweep -> [tau__28] -> F")
-        self.add(expected,  "Bludger -> [tau__28] -> F")
-        self.add(expected,    "Tutor -> [tau__28] -> F")
-        self.add(expected,    "Sweep -> [tau__29] -> F")
-        self.add(expected,    "Drone -> [tau__29] -> F")
-        self.add(expected,    "Tutor -> [tau__29] -> F")
-        self.add(expected,  "Bludger -> [tau__30] -> F")
-        self.add(expected,    "Drone -> [tau__30] -> F")
-        self.add(expected,    "Tutor -> [tau__30] -> F")
-        #
-        self.add(expected,  "Student -> [tau__31] -> F")
-        self.add(expected,    "Sweep -> [tau__31] -> F")
-        self.add(expected,  "Bludger -> [tau__31] -> F")
-        self.add(expected,    "Drone -> [tau__31] -> F")
-        self.add(expected,  "Student -> [tau__32] -> F")
-        self.add(expected,    "Sweep -> [tau__32] -> F")
-        self.add(expected,  "Bludger -> [tau__32] -> F")
-        self.add(expected,    "Tutor -> [tau__32] -> F")
-        self.add(expected,  "Student -> [tau__33] -> F")
-        self.add(expected,    "Sweep -> [tau__33] -> F")
-        self.add(expected,    "Drone -> [tau__33] -> F")
-        self.add(expected,    "Tutor -> [tau__33] -> F")
-        self.add(expected,  "Student -> [tau__34] -> F")
-        self.add(expected,  "Bludger -> [tau__34] -> F")
-        self.add(expected,    "Drone -> [tau__34] -> F")
-        self.add(expected,    "Tutor -> [tau__34] -> F")
-        self.add(expected,    "Sweep -> [tau__35] -> F")
-        self.add(expected,  "Bludger -> [tau__35] -> F")
-        self.add(expected,    "Drone -> [tau__35] -> F")
-        self.add(expected,    "Tutor -> [tau__35] -> F")
-        #
-        self.add(expected,  "Student -> [tau__36] -> F")
-        self.add(expected,    "Sweep -> [tau__36] -> F")
-        self.add(expected,  "Bludger -> [tau__36] -> F")
-        self.add(expected,    "Drone -> [tau__36] -> F")
-        self.add(expected,    "Tutor -> [tau__36] -> F")
         sslog = {1: [ StateSnapshot(1,1700,
                                     set(['Student'])) ,
                       StateSnapshot(1,1701,
@@ -305,7 +249,12 @@ class StateSnapshotMinerRoleStateNetTest(unittest.TestCase):
                       StateSnapshot(3,1710,
                                     set(['Drone']) ) ] }   
         pn = mineWithRecode(sslog,expected)
-        makePicky(expected,range(6,37))
+        arcdebug(expected,pn)
+        pnfragdebug(expected)
+        pnfragdebug(pn)
+        makePicky(expected,range(6,16))
+        #debug(f'expected {expected}')
+        #debug(f'result {pn}')
         self.assertEqual( expected._transitions, pn._transitions)
         self.assertNetEqual(expected,pn)
 
@@ -320,8 +269,8 @@ class StateSnapshotMinerRoleStateNetTest(unittest.TestCase):
         # have to avoid recode as it will hide the set issue
         result = mine(sslog)
         # Note this includes the picky transitions and the final place
-        self.assertEqual(len( result.arcs ), 15) 
-        self.assertEqual(len( result.transitions ), 6) 
+        self.assertEqual(len( result.arcs ), 13) 
+        self.assertEqual(len( result.transitions ), 5) 
         self.assertEqual(len( result.places ), 4) 
 
 
@@ -424,6 +373,7 @@ class StateSnapshotMinerRoleStateNetTest(unittest.TestCase):
 
 
 def arcdebug(net1,net2):
+    debug('arcdebug()')
     sitems1 = sorted(net1.arcs, 
                      key=lambda arc: (arc.from_node.name,arc.to_node.name ) ) 
     sitems2 = sorted(net2.arcs, 
@@ -433,16 +383,41 @@ def arcdebug(net1,net2):
         debug(f"{s1}\t{s2}\t{s1 == s2}")
     debug("")
 
+def trandebug(pn,tran,visited) -> set:
+    output = set()
+    for arc in pn.arcs:
+        if arc not in visited and arc.to_node == tran:
+            output |= {arc}
+            debug(arc)
+    for arc in pn.arcs:
+        if arc not in visited and arc.from_node == tran:
+            output |= {arc}
+            debug(f'            {arc}')
+    return output
+
+
+def pnfragdebug(pn):
+    debug(f'pnfragdebug({pn.name})')
+    output = set()
+    initPlace, finalPlace = findPlaces(pn,'I','F')
+    for arc in pn.arcs:
+        if arc.from_node == initPlace:
+            debug(arc)
+            output |= {arc}
+            output |= trandebug(pn,arc.to_node,output)
+    for tran in sorted(pn.transitions,key=lambda t:t.tid):
+        output |= trandebug(pn,tran,output)
 
 
 # Allows logging to work while running single tests
 if __name__ == '__main__':
+    logger.level = logging.DEBUG
     tr = unittest.TextTestRunner()
     module = __import__(__name__)
     for part in __name__.split('.')[1:]:
         module = getattr(module, part)
     loader = unittest.defaultTestLoader
-    loader.testMethodPrefix = 'test_multi_cases_weight'
+    loader.testMethodPrefix = 'test_two_conc_one_choice_one'
     tests = loader.loadTestsFromModule( module )
     tr.run( tests )
 

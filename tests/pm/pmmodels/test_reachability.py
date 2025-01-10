@@ -1,4 +1,6 @@
 
+import logging
+import sys
 import unittest
 
 from pmkoalas.models.pnfrag import *
@@ -8,6 +10,10 @@ from pm.pmmodels.plpn import Marking
 from pm.pmmodels.rsnet import RoleStateNetSemantics, to_rsnet
 
 from tests.pm.pmmodels.pnfragutil import *
+
+logger = logging.getLogger()
+stream_handler = logging.StreamHandler(sys.stdout)
+logger.addHandler(stream_handler)
 
 def place_tuple_key(pt):
     place, val = pt
@@ -55,8 +61,6 @@ class ReachabilityTest(unittest.TestCase):
                 {((Place("Student",pid="2"), 1), 
                   (Place("Drone",pid="3"), 1)), 
                  ((Place("I",pid="1"), 1),)} )
-
-
 
     def test_empty_marking(self):
         net = self.net("I -> [tau__1] -> Student")
@@ -124,5 +128,63 @@ class ReachabilityTest(unittest.TestCase):
                                   ( (student,1), ),
                                   ( (final,1), )],
                                  markings)
+            
+    def test_longer_loop(self):
+        net = self.net("I -> [tau__1] -> Student -> [tau__2] -> F")
+        self.add(net,                   "Student -> [tau__3] -> Bludger") 
+        self.add(net,                   "Bludger -> [tau__4] -> Student")
+        net = to_rsnet(net)
+        init, student, bludger, final = \
+                findPlaces(net,"I","Student","Bludger", "F")
+        sem = RoleStateNetSemantics( Marking(net,{init:1}) )
+        markings = reachable_markings(sem)
+        self.assertMarkingsEqual([( (init,1),),
+                                  ( (bludger,1), ),
+                                  ( (student,1), ),
+                                  ( (final,1), )],
+                                 markings)
+
+    def test_triple_marking(self):
+        net = self.net("I -> {tau__1 3.0} -> Student")
+        self.add(net,  "Student -> [tau__2] -> Student")
+        self.add(net,  "Student -> [tau__2] -> Sweep")
+        self.add(net,  "Student -> [tau__3] -> Bludger")
+        self.add(net,  "Student -> [tau__4] -> Student")
+        self.add(net,  "Student -> [tau__4] -> Tutor")
+        self.add(net,  "Student -> [tau__5] -> Drone")
+        self.add(net,  "Tutor   -> [tau__5] -> Drone")
+        net = to_rsnet(net)
+        init, student, sweep, bludger, tutor, drone = \
+                findPlaces(net,"I","Student","Sweep", "Bludger", "Tutor", 
+                               "Drone")
+        sem = RoleStateNetSemantics( Marking(net,{init:1}) )
+        markings = reachable_markings(sem)
+        debug(markings)
+        self.assertMarkingsEqual([( (init,1),),
+                                  ( (student,1),),
+                                  ( (bludger,1), ),
+                                  ( (bludger,1), (sweep,1) ),
+                                  ( (bludger,1), (tutor,1) ),
+                                  ( (bludger,1), (sweep,1), (tutor,1) ),
+                                  ( (student,1), (sweep,1) ),
+                                  ( (student,1), (tutor,1) ),
+                                  ( (student,1), (sweep,1), (tutor,1) ),
+                                  ( (drone,1), ),
+                                  ( (drone,1), (sweep,1) )
+                                  ],
+                                 markings)
+
+
+# Allows logging to work while running single tests
+if __name__ == '__main__':
+    logger.level = logging.DEBUG
+    tr = unittest.TextTestRunner()
+    module = __import__(__name__)
+    for part in __name__.split('.')[1:]:
+        module = getattr(module, part)
+    loader = unittest.defaultTestLoader
+    loader.testMethodPrefix = 'test_triple_marking'
+    tests = loader.loadTestsFromModule( module )
+    tr.run( tests )
 
 

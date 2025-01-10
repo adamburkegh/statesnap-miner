@@ -10,6 +10,7 @@ from typing import Any
 from operator import attrgetter
 
 from pmkoalas.models.petrinet import *
+from pm.pmmodels.conform import reachable_markings
 from pm.pmmodels.rsnet import *
 # from logging import debug, info
 
@@ -163,6 +164,10 @@ def minePurePLPN(sslog: dict,label=None,final=True) -> LabelledPetriNet:
 
 
 def minePureRoleStateNet(sslog: dict,label=None) -> RoleStateNet:
+    '''
+    Mine a RoleStateNet, which has picky transitions to a final place for all 
+    reachable markings. 
+    '''
     debug("mineRoleStateNet()")
     arcs = set()
     activities = set()
@@ -201,29 +206,43 @@ def minePureRoleStateNet(sslog: dict,label=None) -> RoleStateNet:
             finals[prevAct] += 1
         else:
             finals[prevAct] = 1
-    placeSubsets = sorted(powerset( activities ))
+    places = set( atop.values() ) | set([initialPlace,finalPlace]) 
+    transitions = set()
+    for tran in atot.values():
+        transitions.add(tran)
+    partialNet = RoleStateNet( places = places, transitions = transitions, 
+        arcs = arcs, name=label )
+    marking = Marking( partialNet, {initialPlace:1} )
+    sem = RoleStateNetSemantics(marking)
+    markings = reachable_markings(sem)
     # debug(f'activities {len(activities)}')
     # debug(f'placeSubsets {len(set(placeSubsets))} {placeSubsets}')
     # debug(f'finals {finals}')
-    for placeSubset in placeSubsets:
-        places = frozenset(placeSubset)
+    debug(f'atop {atop}')
+    for marking in markings:
+        debug(f'    marking {marking}')
+        placeNames = frozenset([place.name for place, ct in marking])
+        debug(f'    places {places}')
         # picky transitions going to final
-        if len(places) == 0:    # skip empty set
+        if len(placeNames) == 0:    # skip empty set
             continue
-        # debug(f'#{places} == {len(places)}')
+        if placeNames == frozenset(initialPlace.name): 
+            # no final transition from initial place
+            continue
         tranId += 1
         tran = silent_transition(tid=tranId)
-        if places in finals:
-            tweights[tran] = finals[places]
+        if placeNames in finals:
+            tweights[tran] = finals[placeNames]
         else:
             tweights[tran] = 1
-        atot[(places,finalRS)] = tran
+        atot[(placeNames,finalRS)] = tran
         tranId = max(tranId,tran.tid)
-        newarcs |= arcsSpanningTran(places,tran,finalPlace.name,atop)
+        newarcs |= arcsSpanningTran(placeNames,tran,finalPlace.name,atop)
         arcs |= newarcs
     places = set( atop.values() ) | set([initialPlace,finalPlace]) 
     transitions = set()
     debug(f'tweights {tweights}')
+    debug(f'atot {atot}')
     for tran in atot.values():
         tran.weight = tweights[tran]
         transitions.add(tran)
