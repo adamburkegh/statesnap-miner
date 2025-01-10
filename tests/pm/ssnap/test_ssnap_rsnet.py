@@ -7,7 +7,7 @@ import sys
 import unittest
 
 from pm.ssnap.ssnap import (StateSnapshot, sslogFromCSV, sslogWithRanges, 
-                         pruneForNoise, arcsSpanningTran, powerset)
+                         pruneForNoise, arcsSpanningTran)
 from pm.ssnap import ssnap
 from pmkoalas.models.petrinet import *
 from pmkoalas.models.pnfrag import *
@@ -417,7 +417,8 @@ if __name__ == '__main__':
     for part in __name__.split('.')[1:]:
         module = getattr(module, part)
     loader = unittest.defaultTestLoader
-    loader.testMethodPrefix = 'test_two_conc_one_choice_one'
+    loader.testMethodPrefix = 'test_singleton_trace_variant'
+    # loader.testMethodPrefix = 'test_multi_cases_weight'
     tests = loader.loadTestsFromModule( module )
     tr.run( tests )
 

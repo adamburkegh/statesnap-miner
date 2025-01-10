@@ -10,7 +10,7 @@ from typing import Any
 from operator import attrgetter
 
 from pmkoalas.models.petrinet import *
-from pm.pmmodels.conform import reachable_markings
+from pm.pmmodels.conform import reachable_markings, sort_place_tuple_seq
 from pm.pmmodels.rsnet import *
 # from logging import debug, info
 
@@ -48,18 +48,6 @@ class StateSnapshot:
         return f"StateSnapshot: {self.caseId} @ {self.time} = {self.activities}"
 
 
-def powerset(iterable):
-    """
-    Subsequences of the iterable from shortest to longest. Each subsequence is
-    also sorted to aid reproducibility.
-    """
-    #
-    # powerset([1,2,3]) → () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)
-    # From https://docs.python.org/3/library/itertools.html#itertools-recipes
-    #
-    s = list(iterable)
-    return [tuple(sorted(x)) for x in \
-            chain.from_iterable(combinations(s, r) for r in range(len(s)+1))]
 
 
 '''
@@ -188,7 +176,7 @@ def minePureRoleStateNet(sslog: dict,label=None) -> RoleStateNet:
     atop[finalPlace.name] = finalPlace
     finalRS = frozenset([finalPlace])
     finals = {}
-    for caseId in sslog:
+    for caseId in sorted(sslog.keys()):
         trace = sslog[caseId]
         prevAct = None
         for snap in trace:
@@ -219,25 +207,31 @@ def minePureRoleStateNet(sslog: dict,label=None) -> RoleStateNet:
     # debug(f'placeSubsets {len(set(placeSubsets))} {placeSubsets}')
     # debug(f'finals {finals}')
     debug(f'atop {atop}')
-    for marking in markings:
-        debug(f'    marking {marking}')
-        placeNames = frozenset([place.name for place, ct in marking])
-        debug(f'    places {places}')
+    nameMarkings = \
+            sorted([tuple(sorted([place.name for place, ct in marking])) \
+                                 for marking in markings])
+    #for marking in markings:
+    debug(f'nameMarkings {nameMarkings}')
+    for placeNames in nameMarkings:
+        # debug(f'    marking {marking}')
+        # placeNames = frozenset([place.name for place, ct in marking])
+        debug(f'    places {placeNames}')
         # picky transitions going to final
         if len(placeNames) == 0:    # skip empty set
             continue
-        if placeNames == frozenset(initialPlace.name): 
+        if placeNames == (initialPlace.name,): 
             # no final transition from initial place
             continue
         tranId += 1
         tran = silent_transition(tid=tranId)
-        if placeNames in finals:
-            tweights[tran] = finals[placeNames]
+        fPlaceNames = frozenset(placeNames)
+        if fPlaceNames in finals:
+            tweights[tran] = finals[fPlaceNames]
         else:
             tweights[tran] = 1
-        atot[(placeNames,finalRS)] = tran
+        atot[(fPlaceNames,finalRS)] = tran
         tranId = max(tranId,tran.tid)
-        newarcs |= arcsSpanningTran(placeNames,tran,finalPlace.name,atop)
+        newarcs |= arcsSpanningTran(fPlaceNames,tran,finalPlace.name,atop)
         arcs |= newarcs
     places = set( atop.values() ) | set([initialPlace,finalPlace]) 
     transitions = set()
