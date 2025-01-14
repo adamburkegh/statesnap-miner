@@ -10,12 +10,30 @@ ENCODING='utf-8'
 
 
 class TransSource(IntEnum):
-    HUCKER = 1
+    """
+    Sources:
+    HUCKER      Hucker, Charles - A Dictionary of Official Titles in 
+                Imperial China
+    CHEN        Chen Bijia - Origins and Career Patterns of the Qing Government 
+                Officials (1850-1912): Evidence from the China Government 
+                Employee Dataset-Qing (CGED-Q). OR: private correspondence 
+                advice from Chen Bijia when she was working in the Lee-Campbell
+                Group at HKUST.
+    HOU         Hou Yueran, private correspondence from Masters student in
+                Lee-Campbell Group at HKUST.
+    Wiktionary  Open dictionary
+    Wikipedia   The amazing encyclopedia that anyone can edit.
+    AB          Adam Burke, originator of this software project.
+
+    """
+
+    HUCKER = 1      
     CHEN = 2
-    WIKTIONARY = 3
-    WIKIPEDIA = 4
-    OTHER = 5
-    ADAMBURKE = 6
+    HOU = 3
+    WIKTIONARY = 4
+    WIKIPEDIA = 5
+    OTHER = 6
+    ADAMBURKE = 7
 
     @staticmethod
     def from_str(label):
@@ -23,6 +41,8 @@ class TransSource(IntEnum):
             return TransSource.HUCKER
         if label == 'Chen':
             return TransSource.CHEN
+        if label == 'Hou':
+            return TransSource.HOU
         if label == 'WT':
             return TransSource.WIKTIONARY
         if label == 'WP':
