@@ -349,6 +349,15 @@ POLICE_OFFICES= set(['江村司','火井漕'])
 POLICE_CHIEF = '巡檢'
 POLICE_CHIEF2 = '巡検'
 
+
+
+
+# 政使 was used by the data team as a catch-all for various junior 
+# administrator positions including 承宣布政使司, Provincial Administration 
+# Commission
+ADMINISTRATOR_SYNTH = '政使'
+PROVINCIAL_ADMIN_COMMISSIONER = '布政使'
+
 knownroles = []
 
 knownroles += countyroles

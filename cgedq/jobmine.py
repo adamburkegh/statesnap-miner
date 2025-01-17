@@ -34,8 +34,9 @@ def mine_export_job(job,tag,jevents,tmlrec,officials,positions,appointments,
         return
     extract_norm_events(jinit,tag,
                     officials,positions,appointments,topn=10 )
-    mineJobStatesByRange('var',tag,noise=noise,years=[5,10,15,20,25,80])
-    mineJobStatesByRange('var','top'+tag,noise=2*noise,years=[5,10,15,20,25,80])
+    mineJobStatesByRange('var',tag,noise=noise,years=[15,20])
+    # mineJobStatesByRange('var',tag,noise=noise,years=[5,10,15,20,25,80])
+    # mineJobStatesByRange('var','top'+tag,noise=2*noise,years=[5,10,15,20,25,80])
 
 
 
@@ -49,8 +50,10 @@ def mine_by_job(job,tag,noise,fin,rebuild_db,tmlin,inputtype,datadir):
 
 def main():
     args = main_parse()
-    mine_by_job('知縣','jmagistrate', 0.001, args.cgedqfile,args.rebuild,
+    mine_by_job('知縣','jmagistrate', 0.0005, args.cgedqfile,args.rebuild,
                 args.tmlfile, args.inputtype, args.datadir)
+    #mine_by_job('知縣','jmagistrate', 0.001, args.cgedqfile,args.rebuild,
+    #            args.tmlfile, args.inputtype, args.datadir)
     # mine_by_job('文淵閣校理','jprofound', 0.002, args.cgedqfile,args.rebuild,
     #            args.tmlfile, args.inputtype, args.datadir)
     # mine_by_job('中允','jcomp', 0.002, args.cgedqfile,args.rebuild,

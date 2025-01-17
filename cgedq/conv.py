@@ -30,7 +30,8 @@ import sqlalchemy
 from sqlalchemy import create_engine
 
 from cgedq.logutil import * 
-from cgedq.roledict import knownroles, role_synonyms, hanzinorm, KONGBAI, GUARD
+from cgedq.roledict import knownroles, role_synonyms, hanzinorm, \
+        KONGBAI, GUARD, ADMINISTRATOR_SYNTH, PROVINCIAL_ADMIN_COMMISSIONER
 from cgedq.roledict import rank_defaults, topexam, zhuangyuan, bangyan, tanhua
 from cgedq.trans import loadroletransfile
 from cgedq.norm import *
@@ -71,6 +72,7 @@ jobfield2='synjob2'
 jobfieldeng=jobfield+'_eng'
 jobfield2eng=jobfield2+'_eng'
 degreefield='chushen_category'
+centralfield='central'
 
 cols=['record_number','person_id','xing','ming','zihao',
       'core_guanzhi','guanzhi','guanzhi_2',
@@ -78,7 +80,7 @@ cols=['record_number','person_id','xing','ming','zihao',
       'diqu','xuhao','year','jigou_1','jigou_2','jigou_3',
       'chushen_category','chushen_1_original','chushen_2_original',
       'chushen_order','chushen_order_2','chushen_1','chushen_2',
-      'chushen_1_jinshi_from_ganzhi']
+      'chushen_1_jinshi_from_ganzhi','central']
 
 if not stata_original_source:
     cols += ['pinji_numeric']
@@ -117,6 +119,9 @@ def normhanzi(instr):
         else:
             res += t
     return res
+
+central_col_map = { 'Central \u4eac\u5b98': True, 
+                    'Non-central \u5916\u5b98': False}
 
 
 jsl_converters = {'record_number': np.int64, 'core_guanzhi': normhanzi,  # text
@@ -210,7 +215,7 @@ def use_converters(df,convs):
     for conv in convs:
         df[conv] = df[conv].map( convs[conv] )
 
-def loadrec(fin,converters):
+def loadrec(fin,converters,firstrows=0):
     fpathj = join(DATA_DIR,fin)
     fpath = fpathj
     info(f'Loading data from {fpath} at {datetime.now()} ...')
@@ -226,6 +231,7 @@ def loadrec(fin,converters):
     elif fin.endswith('dta'):
         recs = pd.read_stata( fpath )
         info(f'JSL stata headers: {list(recs.columns.values)}')
+        info(f'JSL dtypes: {recs.dtypes}')
         if converters:
             use_converters(recs,converters)
         stata_original_source = True # side effect
@@ -233,6 +239,8 @@ def loadrec(fin,converters):
         error(f"Unrecognised format {fpath}")
         sys.exit(1)
     info( "{} rows loaded at {}".format(len(recs),datetime.now() ) )
+    if firstrows > 0:
+        recs = recs.head(firstrows)
     return recs
 
 def use_converters(df,convs):
@@ -251,9 +259,9 @@ def process_raw_tml(tmlin):
     info(tmlrec[['person_id','xuhao_jsl']])
     return tmlrec
 
-def process_raw_cgedq(fin):
+def process_raw_cgedq(fin,firstrows):
     debug('Known roles: {}'.format(knownroles) )
-    cgedq  = loadrec(fin,converters=jsl_converters)
+    cgedq  = loadrec(fin,converters=jsl_converters,firstrows=firstrows)
 
     # xuhao 序号 is the person identifier within an edition
     # clean the seasonal marker rows without this
@@ -285,6 +293,12 @@ def process_raw_cgedq(fin):
         cgedq['pinji_category'] = cgedq['pinji_category'].astype(str)
         cgedq['pinji_category'] = cgedq['pinji_category'].replace(rank_defaults)
         cgedq['pinji_category'] = cgedq['pinji_category'].astype('category')
+        cgedq[centralfield+'_jsl'] = cgedq[centralfield].astype(str)
+        cgedq[centralfield]     = cgedq[centralfield].map( central_col_map )
+        cgedq[centralfield]     = cgedq[centralfield].astype(bool)
+        info('JSL converted dtypes: ')
+        info(f"    pinji_category: {cgedq['pinji_category'].dtypes}")
+        info(f"    {centralfield}: {cgedq[centralfield].dtypes}")
 
     cgedq[personfield] = cgedq[personfield].replace(BLANK,np.nan)
     cgedq.dropna(subset=[personfield], inplace=True)
@@ -434,6 +448,11 @@ def selectfrominit(sevents,msg):
     return pninit
 
 
+def remap_role_conflations(events):
+    zsmask = (events[jobfield] == ADMINISTRATOR_SYNTH) & \
+             (~events[centralfield])
+    events.loc[zsmask,jobfield] = PROVINCIAL_ADMIN_COMMISSIONER
+    return events
 
 
 def filter_basic(cq):
@@ -458,6 +477,7 @@ def filter_basic(cq):
                                   'Juren': '舉人'} )
     events[jobfield] = \
             events[jobfield].replace( role_synonyms ) 
+    events = remap_role_conflations(events)
     return events
 
 
@@ -592,7 +612,8 @@ def export_tml_variants(jevents,tmlrec,officials,positions,appointments,trans):
     extract_norm_events(t2init,'t12jtn07',
                     officials,positions,appointments,topn=10 )
 
-def load_datasets(fin,rebuild_db,tmlin,inputtype,datadir) -> CGEDQDatasets:
+def load_datasets(fin,rebuild_db,tmlin,inputtype,datadir,firstrows=0) \
+        -> CGEDQDatasets:
     global DATA_DIR 
     DATA_DIR = datadir
     trans = loadroletransfile()
@@ -601,7 +622,7 @@ def load_datasets(fin,rebuild_db,tmlin,inputtype,datadir) -> CGEDQDatasets:
         tmlrec = process_raw_tml(tmlin)
     cq = None;  events = None
     if inputtype == 'raw':    
-        cq = process_raw_cgedq(fin)
+        cq = process_raw_cgedq(fin,firstrows=firstrows)
     if inputtype == 'clean':
         cq = process_clean_cgedq(fin)
     events = filter_basic(cq)
