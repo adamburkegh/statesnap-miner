@@ -25,8 +25,8 @@ logger.addHandler(stream_handler)
 def mine(sslog):
     return ssnap.mine(sslog,label="ssmtestrsn")
 
-def mineWithRecode(sslog,expected):
-    result = ssnap.mine(sslog,label="ssmtestrsn")
+def mineWithRecode(sslog,expected,final=True):
+    result = ssnap.mine(sslog,label="ssmtestrsn",final=final)
     recodePlaces(result,expected)
     return result
 
@@ -91,6 +91,12 @@ class StateSnapshotMinerRoleStateNetTest(unittest.TestCase):
         makePicky(expected,[2])
         sslog = {1: [ StateSnapshot(1,1700,set(['Student'])) ] }
         pn = mineWithRecode(sslog,expected)
+        self.assertNetEqual(expected,pn)
+
+    def test_singleton_no_final(self):
+        expected = self.net("I -> [tau__1] -> Student")
+        sslog = {1: [ StateSnapshot(1,1700,set(['Student'])) ] }
+        pn = mineWithRecode(sslog,expected,final=False)
         self.assertNetEqual(expected,pn)
 
     def test_singleton_trace_variant(self):
@@ -417,7 +423,7 @@ if __name__ == '__main__':
     for part in __name__.split('.')[1:]:
         module = getattr(module, part)
     loader = unittest.defaultTestLoader
-    loader.testMethodPrefix = 'test_singleton_trace_variant'
+    loader.testMethodPrefix = 'test_singleton_no_final'
     # loader.testMethodPrefix = 'test_multi_cases_weight'
     tests = loader.loadTestsFromModule( module )
     tr.run( tests )

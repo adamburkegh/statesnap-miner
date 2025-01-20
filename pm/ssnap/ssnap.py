@@ -150,8 +150,51 @@ def minePurePLPN(sslog: dict,label=None,final=True) -> LabelledPetriNet:
     return LabelledPetriNet( places = places, transitions = transitions, 
                              arcs = arcs, name=label )
 
+'''
+def addRSNetFinalTransitions(partialNet, atot, tranId, arcs):
+    if logger.level <= logging.DEBUG:
+        from pm.pmmodels.pnformatter import exportNetToScaledImage
+        import datetime
+        ts = datetime.datetime.now().strftime( '%Y%m%d-%H%M%S' )
+        exportNetToScaledImage('var',f'ssnapDebug-{ts}',partialNet,
+                           sslog,font=None)
+        logger.debug(f'Exported partial net to var/ssnapDebug-{ts}_pn.png')
+    marking = Marking( partialNet, {initialPlace:1} )
+    sem = RoleStateNetSemantics(marking)
+    markings = reachable_markings(sem)
+    # debug(f'activities {len(activities)}')
+    # debug(f'placeSubsets {len(set(placeSubsets))} {placeSubsets}')
+    # debug(f'finals {finals}')
+    debug(f'atop {atop}')
+    nameMarkings = \
+        sorted([tuple(sorted([place.name for place, ct in marking])) \
+                             for marking in markings])
+    debug(f'nameMarkings {nameMarkings}')
+    for placeNames in nameMarkings:
+        # debug(f'    marking {marking}')
+        # placeNames = frozenset([place.name for place, ct in marking])
+        debug(f'    places {placeNames}')
+        # picky transitions going to final
+        if len(placeNames) == 0:    # skip empty set
+            continue
+        if placeNames == (initialPlace.name,):
+            # no final transition from initial place
+            continue
+        tranId += 1
+        tran = silent_transition(tid=tranId)
+        tran.picky = True
+        fPlaceNames = frozenset(placeNames)
+        if fPlaceNames in finals:
+            tweights[tran] = finals[fPlaceNames]
+        else:
+            tweights[tran] = 1
+        atot[(fPlaceNames,finalRS)] = tran
+        tranId = max(tranId,tran.tid)
+        newarcs |= arcsSpanningTran(fPlaceNames,tran,finalPlace.name,atop)
+        arcs |= newarcs
+'''
 
-def minePureRoleStateNet(sslog: dict,label=None) -> RoleStateNet:
+def minePureRoleStateNet(sslog: dict,label=None, final=True) -> RoleStateNet:
     '''
     Mine a RoleStateNet, which has picky transitions to a final place for all 
     reachable markings. 
@@ -171,10 +214,6 @@ def minePureRoleStateNet(sslog: dict,label=None) -> RoleStateNet:
     initRS =  frozenset([initialPlace.name])
     atop[initialPlace.name] = initialPlace
     pid = 2
-    finalPlace = Place(name='F',pid=pid)
-    finalPlace.final = True
-    atop[finalPlace.name] = finalPlace
-    finalRS = frozenset([finalPlace])
     finals = {}
     for caseId in sorted(sslog.keys()):
         trace = sslog[caseId]
@@ -194,47 +233,64 @@ def minePureRoleStateNet(sslog: dict,label=None) -> RoleStateNet:
             finals[prevAct] += 1
         else:
             finals[prevAct] = 1
-    places = set( atop.values() ) | set([initialPlace,finalPlace]) 
+    if final:
+        finalPlace = Place(name='F',pid=pid)
+        finalPlace.final = True
+        atop[finalPlace.name] = finalPlace
+        finalRS = frozenset([finalPlace])
+        places = set( atop.values() ) | set([initialPlace,finalPlace]) 
+    else:
+        places = set( atop.values() ) | set([initialPlace]) 
     transitions = set()
     for tran in atot.values():
         transitions.add(tran)
     partialNet = RoleStateNet( places = places, transitions = transitions, 
         arcs = arcs, name=label )
-    marking = Marking( partialNet, {initialPlace:1} )
-    sem = RoleStateNetSemantics(marking)
-    markings = reachable_markings(sem)
-    # debug(f'activities {len(activities)}')
-    # debug(f'placeSubsets {len(set(placeSubsets))} {placeSubsets}')
-    # debug(f'finals {finals}')
-    debug(f'atop {atop}')
-    nameMarkings = \
+    if final:
+        if logger.level <= logging.DEBUG:
+            from pm.pmmodels.pnformatter import exportNetToScaledImage
+            import datetime
+            ts = datetime.datetime.now().strftime( '%Y%m%d-%H%M%S' )
+            exportNetToScaledImage('var',f'ssnapDebug-{ts}',partialNet,
+                               sslog,font=None)
+            logger.debug(f'Exported partial net to var/ssnapDebug-{ts}_pn.png')
+        marking = Marking( partialNet, {initialPlace:1} )
+        sem = RoleStateNetSemantics(marking)
+        markings = reachable_markings(sem)
+        # debug(f'activities {len(activities)}')
+        # debug(f'placeSubsets {len(set(placeSubsets))} {placeSubsets}')
+        # debug(f'finals {finals}')
+        debug(f'atop {atop}')
+        nameMarkings = \
             sorted([tuple(sorted([place.name for place, ct in marking])) \
                                  for marking in markings])
-    #for marking in markings:
-    debug(f'nameMarkings {nameMarkings}')
-    for placeNames in nameMarkings:
-        # debug(f'    marking {marking}')
-        # placeNames = frozenset([place.name for place, ct in marking])
-        debug(f'    places {placeNames}')
-        # picky transitions going to final
-        if len(placeNames) == 0:    # skip empty set
-            continue
-        if placeNames == (initialPlace.name,): 
-            # no final transition from initial place
-            continue
-        tranId += 1
-        tran = silent_transition(tid=tranId)
-        tran.picky = True
-        fPlaceNames = frozenset(placeNames)
-        if fPlaceNames in finals:
-            tweights[tran] = finals[fPlaceNames]
-        else:
-            tweights[tran] = 1
-        atot[(fPlaceNames,finalRS)] = tran
-        tranId = max(tranId,tran.tid)
-        newarcs |= arcsSpanningTran(fPlaceNames,tran,finalPlace.name,atop)
-        arcs |= newarcs
-    places = set( atop.values() ) | set([initialPlace,finalPlace]) 
+        debug(f'nameMarkings {nameMarkings}')
+        for placeNames in nameMarkings:
+            # debug(f'    marking {marking}')
+            # placeNames = frozenset([place.name for place, ct in marking])
+            debug(f'    places {placeNames}')
+            # picky transitions going to final
+            if len(placeNames) == 0:    # skip empty set
+                continue
+            if placeNames == (initialPlace.name,): 
+                # no final transition from initial place
+                continue
+            tranId += 1
+            tran = silent_transition(tid=tranId)
+            tran.picky = True
+            fPlaceNames = frozenset(placeNames)
+            if fPlaceNames in finals:
+                tweights[tran] = finals[fPlaceNames]
+            else:
+                tweights[tran] = 1
+            atot[(fPlaceNames,finalRS)] = tran
+            tranId = max(tranId,tran.tid)
+            newarcs |= arcsSpanningTran(fPlaceNames,tran,finalPlace.name,atop)
+            arcs |= newarcs
+    if final:
+        places = set( atop.values() ) | set([initialPlace,finalPlace]) 
+    else:
+        places = set( atop.values() ) | set([initialPlace]) 
     transitions = set()
     debug(f'tweights {tweights}')
     debug(f'atot {atot}')
@@ -291,9 +347,9 @@ def minePLPN(sslog: dict, label=None, noiseThreshold=0.0, final=False) \
     else:
         return pnet
 
-def mineRoleStateNet(sslog: dict, label=None, noiseThreshold=0.0) \
+def mineRoleStateNet(sslog: dict, label=None, noiseThreshold=0.0,final=True) \
             -> RoleStateNet:
-    pnet = minePureRoleStateNet(sslog,label)
+    pnet = minePureRoleStateNet(sslog,label,final)
     if noiseThreshold > 0:
         return pruneForNoise(pnet,noiseThreshold)
     else:
