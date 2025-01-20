@@ -4,10 +4,14 @@ Extract cohorts by district
 
 
 from datetime import datetime
+import logging
 from cgedq.conv import *
 from cgedq.logutil import * 
 from cgedq.mine import mineJobStates, mineJobStatesByRange
 from cgedq.trans import loadplacetransfile
+
+logger = logging.logger( __name__ )
+# logger.setLevel( logging.DEBUG )
 
 
 def mine_export_job(job,tag,jevents,tmlrec,officials,positions,appointments,
@@ -49,6 +53,7 @@ def mine_by_job(job,tag,noise,fin,rebuild_db,tmlin,inputtype,datadir):
 
 
 def main():
+    logging.basicConfig(level=logging.DEBUG)
     args = main_parse()
     mine_by_job('知縣','jmagistrate', 0.0005, args.cgedqfile,args.rebuild,
                 args.tmlfile, args.inputtype, args.datadir)

@@ -10,8 +10,6 @@ import pandas as pd
 import pm4py
 from pm4py.objects.log.util import dataframe_utils
 from pm4py.objects.conversion.log import converter as log_converter
-from pm4py.objects.petri_net.exporter import exporter as pnml_exporter
-from pm4py.objects.conversion.process_tree import converter as pt_converter
 from pm4py.objects.process_tree.exporter import exporter as ptml_exporter
 from pm4py.objects.log.exporter.xes import exporter as xes_exporter
 
@@ -149,10 +147,10 @@ def exportNetToImage(vard,oname,pn):
     dotStr = convert_net_to_dot(pn)
     export_DOT_to_image(vard,oname,dotStr)
 
-def mineByTime(vard,fname,sslog:set,years:int,noise=0.0,font=None):
+def mineByTime(vard,fname,sslog:set,years:int,noise=0.0,font=None,final=True):
     sslogn = filterByTimeOnInt(sslog, years)
     reportLogStats(sslogn, fname+ "_y" + str(years))
-    pn = mine(sslogn,noiseThreshold=noise)
+    pn = mine(sslogn,label=fname,noiseThreshold=noise,final=final)
     tsum = sum([tran.weight for tran in pn.transitions])
     info(f'Total weights: {tsum} ... weight threshold: {noise*tsum}')
     #exportNetToScaledImage(vard,
@@ -164,7 +162,7 @@ def mineByTime(vard,fname,sslog:set,years:int,noise=0.0,font=None):
     # exportNetToImage(vard,f"{fname}_ss{str(years).zfill(3)}y",pn)
 
 
-def mineJobStatesByRange(vard:str,fid:str,noise:float,years:list):
+def mineJobStatesByRange(vard:str,fid:str,noise:float,years:list,final=True):
     fname = f'{trange}-{fid}'
     fnameeng = fname + 'eng'
     info("Loading ..." + fname )
@@ -183,8 +181,8 @@ def mineJobStatesByRange(vard:str,fid:str,noise:float,years:list):
                          keepSuccDupes=False)
     info("Mining states ..." )
     for year in years:
-        mineByTime(vard,fname,sslog,year,noise)
-        mineByTime(vard,fnameeng,sslogeng,year,noise,font=ENGFONT)
+        mineByTime(vard,fnameeng,sslogeng,year,noise,font=ENGFONT,final=final)
+        mineByTime(vard,fname,sslog,year,noise,final=final)
     
 
 def mineJobStates(vard:str,fid:str,noise=0.0):
