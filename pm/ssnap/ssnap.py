@@ -2,6 +2,7 @@
 Mine a place-labelled SLPN from a state snapshot log.
 '''
 
+from collections import defaultdict
 import csv
 from dataclasses import dataclass
 from itertools import chain, combinations
@@ -193,7 +194,7 @@ def minePureRoleStateNet(sslog: dict,label=None, final=True) -> RoleStateNet:
     Mine a RoleStateNet, which has picky transitions to a final place for all 
     reachable markings. 
     '''
-    debug("mineRoleStateNet()")
+    debug("minePureRoleStateNet()")
     arcs = set()
     activities = set()
     atop = {}
@@ -295,6 +296,7 @@ def pruneForNoise(pnet,noiseThreshold):
     result = LabelledPetriNet(keepplaces,keeptrans,keeparcs,pnet.name)
     return result
 
+
 def minePLPN(sslog: dict, label=None, noiseThreshold=0.0, final=False) \
             -> LabelledPetriNet:
     pnet = minePurePLPN(sslog,label,final)
@@ -305,11 +307,11 @@ def minePLPN(sslog: dict, label=None, noiseThreshold=0.0, final=False) \
 
 def mineRoleStateNet(sslog: dict, label=None, noiseThreshold=0.0,final=True) \
             -> RoleStateNet:
-    pnet = minePureRoleStateNet(sslog,label,final)
     if noiseThreshold > 0:
-        return pruneForNoise(pnet,noiseThreshold)
+        nrlog =  noiseReduceByVariant(sslog, noiseThreshold) 
+        return minePureRoleStateNet(nrlog,label,final)
     else:
-        return pnet
+        return minePureRoleStateNet(sslog,label,final)
 
 mine = mineRoleStateNet
 
@@ -413,5 +415,31 @@ def reportLogStats(sslog: dict,logname: str = None):
     result += f"  # states: {states}"
     info(result)
 
+
+
+def sstrace_to_variant(sstrace) -> tuple:
+    lresult = [ss.activities for ss in sstrace]
+    return tuple(lresult)
+
+def noiseReduceByVariant(sslog: dict, noiseThreshold) -> dict: 
+    '''
+    Remove trace variants where proportional frequency is less than the noise 
+    threshold.
+    '''
+    if noiseThreshold <= 0:
+        return sslog
+    variants = defaultdict(int)
+    total = 0
+    for ss in sslog:
+        variant = sstrace_to_variant(sslog[ss])
+        variants[variant] += 1
+        total += 1
+    threshold = noiseThreshold * total
+    result = {}
+    for ss in sslog:
+        variant = sstrace_to_variant(sslog[ss])
+        if variants[variant] >= threshold:
+            result[ss] = sslog[ss]
+    return result
 
 
