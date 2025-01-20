@@ -695,8 +695,8 @@ def main():
 
 
 if __name__ == "__main__":
-    # main()
-    process_public_extract()
+    main()
+    # process_public_extract()
 
 
 
