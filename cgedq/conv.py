@@ -658,9 +658,9 @@ def process_public_extract():
     DATA_DIR = 'data'
     fin = 'cged-q-ab-20220303.dta'
     tmlin = 'cged-q-ab-jsl-tml-20221012.dta'
-    trans = loadtransfile()
+    trans = loadroletransfile()
     tmlrec = process_raw_tml(tmlin)
-    cq = process_raw_cgedq(fin)
+    cq = process_raw_cgedq(fin,firstrows=0)
     events = filter_basic(cq)
     startyear = 1850
     public_mask1 = events.year.between(startyear,1864)
@@ -695,8 +695,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
-    # process_public_extract()
+    # main()
+    process_public_extract()
 
 
 
