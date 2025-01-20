@@ -1,10 +1,14 @@
 
 from copy import deepcopy
-from logging import debug
+import logging
 from typing import Iterable
 
 from pmkoalas.models.petrinet import Place, LabelledPetriNet
 from pm.pmmodels.plpn import Marking, PetriNetSemantics
+
+logger = logging.getLogger(__name__)
+debug, info = logger.debug, logger.info
+
 
 def place_tuple_key(pt):
     place, val = pt
@@ -24,7 +28,6 @@ def freeze_mark(marking:Marking):
     # return tuple(sorted(marking.mark.items()))
     return sort_place_tuple_seq(marking.mark.items())
 
-
 def reachable_markings(semantics:PetriNetSemantics,visited:set=set(),level=0) \
         -> Iterable:
     '''
@@ -39,17 +42,18 @@ def reachable_markings(semantics:PetriNetSemantics,visited:set=set(),level=0) \
         return set()
     result = set( [freeze_semantics(semantics)] )
     startMark = deepcopy(semantics.mark.mark)
-    # debug(f'{level} startMark {startMark}')
+    debug(f'{level} startMark {startMark}')
     enabled = semantics.enabled()
-    # debug(f'{level} enabled {semantics.enabled()}')
+    debug(f'{level} enabled {semantics.enabled()}')
     for tran in enabled:
         # debug(f'    semantics.mark {semantics.mark}')
-        debug(f'    {level}    marking {semantics.mark.mark}')
+        # debug(f'    {level}    marking {semantics.mark.mark}')
         # debug(f'    {level}    enabled {enabled}')
         nm = semantics.remark(tran)
         newmark = freeze_mark(nm)
         if newmark not in result and newmark not in visited:
-            next_markings = reachable_markings(semantics, result,level+1)
+            next_markings = reachable_markings(semantics, result | visited,
+                                               level+1)
             result |= next_markings
         # debug(f'    {level}     next_markings {next_markings}')
         semantics.mark = Marking(semantics.mark.net,startMark)
