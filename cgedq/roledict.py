@@ -206,6 +206,7 @@ HANLIN_ACAD_EIW=HANLIN + EXPOSITOR_IN_WAITING + ACADEMICIAN
 LIBATIONER=DIRECTORATE_EDUCATION+'祭酒'
 LIBRARIAN='洗馬'
 MINOR_CAPITAL_OFFICIAL='小京官'
+SECRETARY_CLERK='中書'
 juniorroles=[DAY_OFFICIAL,JUNIOR_COMPILER,SENIOR_COMPILER, 
              ATTENDANT_READER,
              ACADEMICIAN_READER_IN_WAITING,HANLIN_ACAD_RIW,
@@ -213,7 +214,8 @@ juniorroles=[DAY_OFFICIAL,JUNIOR_COMPILER,SENIOR_COMPILER,
              HANLIN_ACAD_EIW,
              COLLOQ_READER,
              LIBATIONER,LIBRARIAN,MINOR_CAPITAL_OFFICIAL,
-             BACHELOR,TRUNC_HANLIN_BACHELOR]
+             BACHELOR,TRUNC_HANLIN_BACHELOR,
+             SECRETARY_CLERK]
 
 ADMIN='事務'
 ADMIN2='侍務'
@@ -306,11 +308,18 @@ schools= set([BANNER_SCHOOL])
 # Role and organization can be same here
 SURVEILLANCE_CIRCUIT='分巡'
 MILITARY_SCIRCUIT='兵備道'
-circuit_types = set([SURVEILLANCE_CIRCUIT,MILITARY_SCIRCUIT ] )
+ADMIN_CIRCUIT='分守'
+surv_circuit_types = set([SURVEILLANCE_CIRCUIT,MILITARY_SCIRCUIT ] )
 subcircuits = set(['湖南辰永沅靖',
                    '湖南辰沅永靖',
                    '迤東驛堡'] )  # Could break out province eg Hunan
+admin_subcircuits = set(['粮儲','糧儲'])
+ADMIN_SUBCIRCUIT_SUFFIX = '道務'
 
+SEA_DEFENSE= '整飭海防'
+SEA_DEFENSE2='整飭處海防'
+sea_defense_types = set([SEA_DEFENSE,SEA_DEFENSE2])
+sea_defense_subcircuits = set(['登萊青','登萊靑'])
 
 ganzhi = ['庚寅','庚辰',
           '戊辰','辛未',
@@ -508,7 +517,8 @@ provincial_bureau_roles =  \
         for province in regions \
         for role in provincial_bureau_baseroles ] 
 knownroles, role_synonyms = new_synonyms(provincial_bureau_roles)
-knownroles += [VICE_BUREAU_DIRECTOR,VICE_BUREAU_DIRECTOR+CASUAL]
+knownroles += [VICE_BUREAU_DIRECTOR,VICE_BUREAU_DIRECTOR+CASUAL,
+               SECRETARY,SECRETARY+CASUAL]
 
 
 bureaubaseroles = [SECRETARY,BOARD_DIRECTOR,VICE_BUREAU_DIRECTOR,
@@ -596,8 +606,19 @@ role_synonyms |= dict([(province + rank,rank) for province in regions
 circuit_surveillors = [(surv+circuit+circuit_type,surv) \
                             for surv in surveillors \
                             for circuit in subcircuits \
-                            for circuit_type in circuit_types]
+                            for circuit_type in surv_circuit_types]
 knownroles, role_synonyms = new_synonyms(circuit_surveillors)
+
+circuit_admins = [(ADMIN_CIRCUIT+subcircuit+ADMIN_SUBCIRCUIT_SUFFIX,
+                   ADMIN_CIRCUIT) \
+                    for subcircuit in admin_subcircuits]
+knownroles, role_synonyms = new_synonyms(circuit_admins)
+
+sea_defense_admins = [(ADMIN_CIRCUIT+subcircuit+seadefense,ADMIN_CIRCUIT) \
+                    for subcircuit in sea_defense_subcircuits \
+                    for seadefense in sea_defense_types]
+knownroles, role_synonyms = new_synonyms(sea_defense_admins)
+
 
 transportroles = [(route + role,TRANSPORT_CONTROLLER) \
                         for role in transportofficials \
