@@ -13,7 +13,7 @@ Position,Pinyin,Translation,Source
 春坊庶子,chunfang,Mentor of the Secretariat of the Heir Apparent,Hucker
 大臣,dachen,Grand Minister,Hucker
 大學士,daxueshi,Grand Secretary,Hucker
-大學士稽察欽奉上諭事件處,daxueshi jicha yinfeng shangyu shijianhu,Grand Secretary of the Office for the Distribution of Imperial Pronouncements,Hucker
+大學士稽察欽奉上諭事件處,daxueshi jicha yinfeng shangyu shijianchu,Grand Secretary of the Office for the Distribution of Imperial Pronouncements,Hucker
 典史,dianshi,District Jailor,Chen
 督標中軍副將,dubiao zhongjun fujiang,Brigadier of the Middle Provincial Army,AB
 都察院都御史,duchuyuan duyushi,Chief Censor,AB
@@ -54,6 +54,7 @@ Position,Pinyin,Translation,Source
 檢討,jiantao,Examining Editor,Chen
 進士,jinshi,imperial exam degree,WT
 京官,jingguan,Capital Official,Hucker
+經歷,jingli,Registrar,Hucker
 經筵講官,jingyanduguan,Classics Colloquium Reader,Hucker
 举人,juren,provincial exam degree,WT
 軍機大臣,junji dachen,Grand Minister of State,Hucker
@@ -140,12 +141,13 @@ Position,Pinyin,Translation,Source
 指揮,zhihui,Commander,Hucker
 知州,zhizhou,Department Magistrate,Hucker
 執事官,zhishiguan,Attendant,WT
+中書,zhongshu,Secretary (Clerk),Hucker
 中書,zhongshu,Secretary,Chen
 中允,zhongyun,Companion to the Heir Apparent,Hucker
 狀元,zhuangyan,Optimus (highest jinshi exam place),Chen
 主考,zhukao,Provincial Examiner,Hucker
 主考,zhukao,Chief Examiner,WT
-主事,zhushi,Secretary,Hucker
+主事,zhushi,Secretary (of Ministry or Board),Hucker
 主事行走,zhushixingzou,Intern Secretary (of Ministry or Board),Chen
 總兵官,zongbingguan,Commander,WP
 總裁,zongcai,Chairman,WT
