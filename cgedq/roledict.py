@@ -321,6 +321,9 @@ subcircuits = set(['湖南辰永沅靖',
 admin_subcircuits = set(['粮儲','糧儲'])
 ADMIN_SUBCIRCUIT_SUFFIX = '道務'
 
+postal_subcircuits = set(['河南陜汝','河陜汝','河陜汝等處'])
+POSTAL_SUBCIRCUIT_SUFFIX = '地方驛傳'
+
 SEA_DEFENSE= '整飭海防'
 SEA_DEFENSE2='整飭處海防'
 sea_defense_types = set([SEA_DEFENSE,SEA_DEFENSE2])
@@ -363,6 +366,15 @@ POLICE_OFFICES= set(['江村司','火井漕'])
 POLICE_CHIEF = '巡檢'
 POLICE_CHIEF2 = '巡検'
 
+# Maybe should be fixed in hanzi_norm
+DISTRICT_JAILOR = '捕盗廳'
+DISTRICT_JAILOR2 = '捕盗廳'
+DISTRICT_JAILOR3 = '捕盜廳'
+DISTRICT_JAILOR4 = '捕盜廰'
+DISTRICT_JAILOR5 = '捕盜㕔'
+jailors = set([DISTRICT_JAILOR,DISTRICT_JAILOR2,DISTRICT_JAILOR3,
+               DISTRICT_JAILOR4,DISTRICT_JAILOR5])
+roads = set(['南路','西路','北路','東路'])
 
 
 
@@ -618,6 +630,11 @@ circuit_surveillors = [(surv+circuit+circuit_type,surv) \
                             for circuit_type in surv_circuit_types]
 knownroles, role_synonyms = new_synonyms(circuit_surveillors)
 
+postal_surveillors = [(SURVEILLANCE_CIRCUIT+circuit+POSTAL_SUBCIRCUIT_SUFFIX,
+                       SURVEILLANCE_CIRCUIT) \
+                            for circuit in postal_subcircuits ]
+knownroles, role_synonyms = new_synonyms(postal_surveillors)
+
 circuit_admins = [(ADMIN_CIRCUIT+subcircuit+ADMIN_SUBCIRCUIT_SUFFIX,
                    ADMIN_CIRCUIT) \
                     for subcircuit in admin_subcircuits]
@@ -642,6 +659,10 @@ police = [(POLICE_CHIEF2,POLICE_CHIEF)] + \
 knownroles, role_synonyms = new_synonyms(police)
 knownroles += [POLICE_CHIEF]
 
+bandit_jailors = [(road+jailor,DISTRICT_JAILOR) \
+                    for jailor in jailors \
+                    for road in roads]
+knownroles, role_synonyms = new_synonyms(bandit_jailors)
 
 # Spring court of the Heir Apparent
 role_synonyms |= {SPRINGC_ADMONISHER: ADMONISHER,
