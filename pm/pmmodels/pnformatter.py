@@ -83,6 +83,7 @@ class ScaledFormatter(PetriNetDOTFormatter):
 
 INITIAL_NAME = 'I'
 FINAL_NAME = 'F'
+FINAL_ARC_OVERFLOW = 20
 
 def picky_arc(arc:Arc) -> bool:
     # print(f'picky_arc({arc})')
@@ -95,12 +96,14 @@ class RoleStateNetFormatter(ScaledFormatter):
 
     def __init__(self,pn:RoleStateNet,sslog:dict,font='SimSun',
                  termination_weights=True,
-                 initial_name = INITIAL_NAME, final_name=FINAL_NAME):
+                 initial_name = INITIAL_NAME, final_name=FINAL_NAME,
+                 final_arc_overflow=FINAL_ARC_OVERFLOW):
         super().__init__(pn,sslog,font)
         self._termination_weights = termination_weights
         self._initial_name = initial_name
         self._final_name = final_name
         self._fontsize = 14
+        self._final_arc_overflow = final_arc_overflow
 
     def prelude(self) -> str:
         dotstr = 'digraph G{\n'
@@ -117,22 +120,34 @@ class RoleStateNetFormatter(ScaledFormatter):
         debug(f'   picky_arcs {len(picky_arcs)}')
         if len(picky_arcs) == 0:
             return ""
+        suppress_defaults = len(picky_arcs) > self._final_arc_overflow
+        suppressed_finals = 0
+        default_final_weight = 1
         fstr =  f'n{str(ni)} [shape="none",margin="0",'
         fstr += f'label=<<table border="1" cellborder="0">\n'
-        fstr += '<th><td>Roles</td><td>Termination Weight</td></th>'
+        fstr += '<th><td><b>Roles</b></td><td><b>Termination Weight'
+        fstr += '</b></td></th>'
         tran_incoming = {}
         for arc in picky_arcs:
             if isinstance(arc.to_node,Transition):
                 tran = arc.to_node
-                if tran in tran_incoming:
-                    tran_incoming[tran].append(arc.from_node)
+                if suppress_defaults and not tran.observed:
+                    suppressed_finals += 1
+                    default_final_weight = tran.weight
                 else:
-                    tran_incoming[tran] = [arc.from_node]
-        for tran in tran_incoming:
+                    if tran in tran_incoming:
+                        tran_incoming[tran].append(arc.from_node)
+                    else:
+                        tran_incoming[tran] = [arc.from_node]
+        for tran in sorted(tran_incoming,key=lambda tran: -tran.weight):
             fstr += '<tr><td align="left">'
             for place in tran_incoming[tran]:
                 fstr += f'{place.name}; '
             fstr += f'</td><td align="right">{tran.weight}</td></tr>\n'
+        if suppress_defaults and suppressed_finals:
+            fstr += '<tr><td align="left">'
+            fstr += f'{suppressed_finals} unobserved combinations'
+            fstr += f'</td><td align="right">{default_final_weight}</td></tr>\n'
         fstr += '</table>>];\n'
         return fstr
 

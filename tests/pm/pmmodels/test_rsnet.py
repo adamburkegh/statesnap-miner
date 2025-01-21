@@ -167,7 +167,7 @@ class RoleStateNetSemanticsTest(unittest.TestCase):
         pf = Place("F","pf")
         ta = RSTransition("a")
         tb = RSTransition("b")
-        tc = RSTransition("c",True)
+        tc = RSTransition("c",pickyt=True)
         td = RSTransition("d")
         net = LabelledPetriNet([pi,p1,p2,p3,p4,pf],[ta,tb,tc,td],  
                                [Arc(pi,ta), 

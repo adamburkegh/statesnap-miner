@@ -12,16 +12,21 @@ from pm.pmmodels.plpn import Marking, singleton_marking, PetriNetSemantics
 
 # Is class hierarchy the best way to represent?
 class RSTransition(Transition):
-    def __init__(self,name,pickyt=False,tid=None):
+    def __init__(self,name,tid=None,pickyt=False,observed=True):
         if tid == None:
             Transition.__init__(self,name,tid=name)
         else:
             Transition.__init__(self,name,tid=tid)
         self._picky = pickyt
+        self._observed = observed
 
     @property
     def picky(self):
         return self._picky
+
+    @property
+    def observed(self):
+        return self._observed
 
     def __eq__(self,other):
         return Transition.__eq__(self,other) \

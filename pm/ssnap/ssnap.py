@@ -179,11 +179,13 @@ def addRSNetFinalTransitions(partialNet, atot, atop, tranId, tweights, arcs,
         tranId += 1
         tran = silent_transition(tid=tranId)
         tran.picky = True
+        tran.observed = True
         fPlaceNames = frozenset(placeNames)
         if fPlaceNames in finals:
             tweights[tran] = finals[fPlaceNames]
         else:
             tweights[tran] = 1
+            tran.observed = False
         atot[(fPlaceNames,finalRS)] = tran
         tranId = max(tranId,tran.tid)
         newarcs = arcsSpanningTran(fPlaceNames,tran,finalPlace.name,atop)
