@@ -283,10 +283,15 @@ bureaus = set(['文選司', # Appointments
                '驗封司','騐封司',   # Border inspector?
                '稽勳司','稽勲司','積勳司',      # Inspectors of merit?
                '職方司', # Duties?
-               '虞衡司'  # Hunting? Prediction?
+               '虞衡司',  # Hunting? Prediction?
+               '祠祭淸吏司', # Sacrifices
+               '祠祭司'  # Sacrifices, abbreviation
                 ])
 
+PROVINCIAL_BUREAU='省'+BUREAU
+
 VICE_BUREAU_DIRECTOR='員外郎'
+
 CAPITAL_OFFICIAL='京官'
 SALT_CONTROLLER = '鹽運使司運同'
 
@@ -336,6 +341,11 @@ ganzhi = ['庚寅','庚辰',
           '癸未','丁丑','甲戌']
 
 PROVINCIAL_TEMPS='司行走'
+PROVINCIAL_INTERN='省'+PROVINCIAL_TEMPS
+
+GENERAL_SERVICES_OFFICE='司務' 
+# As adjective; Hucker has 司務廳 General Services Office
+GENERAL_SERVICES_PROVINCIAL_INTERN=GENERAL_SERVICES_OFFICE+PROVINCIAL_INTERN
 
 GUARD='侍衛'
 METRO_COMMAND='侍衛司'
@@ -374,7 +384,7 @@ DISTRICT_JAILOR4 = '捕盜廰'
 DISTRICT_JAILOR5 = '捕盜㕔'
 jailors = set([DISTRICT_JAILOR,DISTRICT_JAILOR2,DISTRICT_JAILOR3,
                DISTRICT_JAILOR4,DISTRICT_JAILOR5])
-roads = set(['南路','西路','北路','東路'])
+roads = set([direction + '路' for direction in directions]) 
 
 
 
@@ -489,9 +499,8 @@ role_synonyms |= {HANLIN_ACAD_RIW:ACADEMICIAN_READER_IN_WAITING}
 role_synonyms |= {HANLIN_ACAD_EIW:ACADEMICIAN_EXPOSITOR_IN_WAITING}
 
 provincial_board_directors = [(BOARD_DIRECTOR + province + PROVINCIAL_TEMPS,
-                              BOARD_DIRECTOR) for province in regions ]
+                              BOARD_DIRECTOR+CASUAL) for province in regions ]
 knownroles, role_synonyms = new_synonyms(provincial_board_directors)
-
 
 degreeorig = 'chushen_1_original'
 
@@ -541,9 +550,21 @@ knownroles, role_synonyms = new_synonyms(provincial_bureau_roles)
 knownroles += [VICE_BUREAU_DIRECTOR,VICE_BUREAU_DIRECTOR+CASUAL,
                SECRETARY,SECRETARY+CASUAL]
 
+provincial_interns = [(province + PROVINCIAL_TEMPS,PROVINCIAL_INTERN) \
+                            for province in regions ]
+provincial_interns += [(GENERAL_SERVICES_OFFICE + province,
+                        GENERAL_SERVICES_OFFICE + PROVINCIAL_BUREAU) \
+                            for province in regions ]
+provincial_interns += [(GENERAL_SERVICES_OFFICE + province + BUREAU,
+                        GENERAL_SERVICES_OFFICE + PROVINCIAL_BUREAU) \
+                            for province in regions ]
+provincial_interns += [(GENERAL_SERVICES_OFFICE + province + PROVINCIAL_TEMPS,
+                        GENERAL_SERVICES_OFFICE + PROVINCIAL_INTERN) \
+                            for province in regions ]
+knownroles, role_synonyms = new_synonyms(provincial_interns)
 
 bureaubaseroles = [SECRETARY,BOARD_DIRECTOR,VICE_BUREAU_DIRECTOR,
-                   MINOR_CAPITAL_OFFICIAL ]
+                   MINOR_CAPITAL_OFFICIAL,GENERAL_SERVICES_OFFICE ]
 bureauroles = [(SECRETARY + bureau,SECRETARY) for bureau in bureaus ] \
             + [(role + bureau + CASUAL,role + CASUAL) \
                     for bureau in bureaus \
