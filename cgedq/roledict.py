@@ -42,6 +42,7 @@ BLUE_FEATHER='藍翎'
 FLOWER_FEATHER='花翎'
 CLASS='科'
 DIRECTORATE_EDUCATION='國子監'
+SUPERNUM='額外'
 
 EXAMINER='考官'  
 VICE_EXAMINER='副'+EXAMINER
@@ -213,13 +214,17 @@ juniorroles=[DAY_OFFICIAL,JUNIOR_COMPILER,SENIOR_COMPILER,
              EXPOSITOR_IN_WAITING,ACADEMICIAN_EXPOSITOR_IN_WAITING,
              HANLIN_ACAD_EIW,
              COLLOQ_READER,
-             LIBATIONER,LIBRARIAN,MINOR_CAPITAL_OFFICIAL,
+             LIBATIONER,LIBRARIAN,
+             MINOR_CAPITAL_OFFICIAL,MINOR_CAPITAL_OFFICIAL+CASUAL,
              BACHELOR,TRUNC_HANLIN_BACHELOR,
              SECRETARY_CLERK]
 
 ADMIN='事務'
 ADMIN2='侍務'
 SECRETARY='主事'    # of a department or board
+
+REGISTRAR='經歷'
+registrars = [REGISTRAR,SUPERNUM+REGISTRAR]
 
 COUNTY_MAGISTRATE = '知縣'
 COUNTY_PREFECT = '知府'
@@ -369,6 +374,7 @@ PROVINCIAL_ADMIN_COMMISSIONER = '布政使'
 
 knownroles = []
 
+knownroles += registrars
 knownroles += countyroles
 knownroles += magistrates
 knownroles += examiners
@@ -417,6 +423,9 @@ def export_roles(exportfname,encoding='utf-8'):
 
 # students
 role_synonyms |= {UPPER_STUDENT2: UPPER_STUDENT}
+
+# registrars 
+role_synonyms |= {SUPERNUM+REGISTRAR:REGISTRAR}
 
 provincial_censors =  \
     [(CONTROLLER + province + '道'+ CENSOR,CENSOR)  \
