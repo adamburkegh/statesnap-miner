@@ -180,6 +180,8 @@ CAPITAL_GOVERNOR='順天府府尹'
 midroles=set([DIRECTOR_STUDIES,CAPITAL_GOVERNOR])
 
 MANAGER='管理'
+SUPERVISORY_MANAGER='督理'
+SUPERINTENDANT='總理'
 
 CENSOR = '監察御史'
 CHIEF_CENSOR='都察院都御史'
@@ -295,6 +297,12 @@ VICE_BUREAU_DIRECTOR='員外郎'
 CAPITAL_OFFICIAL='京官'
 SALT_CONTROLLER = '鹽運使司運同'
 
+salt_regions = ['江西通省','湖北全省','直省山東']
+salt_regions += [region+'等處地方' for region in salt_regions]
+SALT_CONTROL_CIRCUIT = '鹽法道'
+
+provincial_salt_roles = set([MANAGER,SUPERVISORY_MANAGER,SUPERINTENDANT])
+
 BANNER_SCHOOL='八旗官學'
 raremgroffices = set(['溝渠河道會典館', # Canal Excavation
                       '界亭等處地方', # Jieting and surrounds, maybe
@@ -322,8 +330,8 @@ ADMIN_CIRCUIT='分守'
 surv_circuit_types = set([SURVEILLANCE_CIRCUIT,MILITARY_SCIRCUIT ] )
 subcircuits = set(['湖南辰永沅靖',
                    '湖南辰沅永靖',
-                   '迤東驛堡'] )  # Could break out province eg Hunan
-admin_subcircuits = set(['粮儲','糧儲'])
+                   '迤東驛堡' ] )  # Could break out province eg Hunan
+admin_subcircuits = set(['粮儲','糧儲','武昌府','濟東泰武臨道'])
 ADMIN_SUBCIRCUIT_SUFFIX = '道務'
 
 postal_subcircuits = set(['河南陜汝','河陜汝','河陜汝等處'])
@@ -563,6 +571,11 @@ provincial_interns += [(GENERAL_SERVICES_OFFICE + province + PROVINCIAL_TEMPS,
                             for province in regions ]
 knownroles, role_synonyms = new_synonyms(provincial_interns)
 
+provincial_salt = [(role+salt_region+SALT_CONTROL_CIRCUIT,role) \
+                    for role in provincial_salt_roles \
+                    for salt_region in salt_regions]
+knownroles, role_synonyms = new_synonyms(provincial_salt)
+
 bureaubaseroles = [SECRETARY,BOARD_DIRECTOR,VICE_BUREAU_DIRECTOR,
                    MINOR_CAPITAL_OFFICIAL,GENERAL_SERVICES_OFFICE ]
 bureauroles = [(SECRETARY + bureau,SECRETARY) for bureau in bureaus ] \
@@ -573,6 +586,7 @@ knownroles, role_synonyms = new_synonyms(bureauroles)
 
 saltroles = [SALT_CONTROLLER]
 knownroles += saltroles
+
 
 #senior
 role_synonyms |= { ASSISTANT_GRAND_SECRETARY2: ASSISTANT_GRAND_SECRETARY,
@@ -658,6 +672,8 @@ knownroles, role_synonyms = new_synonyms(postal_surveillors)
 
 circuit_admins = [(ADMIN_CIRCUIT+subcircuit+ADMIN_SUBCIRCUIT_SUFFIX,
                    ADMIN_CIRCUIT) \
+                    for subcircuit in admin_subcircuits]
+circuit_admins += [(ADMIN_CIRCUIT+subcircuit,ADMIN_CIRCUIT) \
                     for subcircuit in admin_subcircuits]
 knownroles, role_synonyms = new_synonyms(circuit_admins)
 
