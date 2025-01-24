@@ -5,6 +5,7 @@ Mine a place-labelled SLPN from a state snapshot log.
 from collections import defaultdict
 import csv
 from dataclasses import dataclass
+from datetime import datetime
 from itertools import chain, combinations
 import logging
 from typing import Any
@@ -280,7 +281,7 @@ This gets noise reduced to:
 
 Which is disconnected.
 '''
-def pruneForNoise(pnet,noiseThreshold):
+def pruneForNoiseByTranWeight(pnet,noiseThreshold):
     tsum = 0
     for tran in pnet.transitions:
         tsum += tran.weight
@@ -303,7 +304,7 @@ def minePLPN(sslog: dict, label=None, noiseThreshold=0.0, final=False) \
             -> LabelledPetriNet:
     pnet = minePurePLPN(sslog,label,final)
     if noiseThreshold > 0:
-        return pruneForNoise(pnet,noiseThreshold)
+        return pruneForNoiseByTranWeight(pnet,noiseThreshold)
     else:
         return pnet
 
@@ -403,7 +404,7 @@ def ssSetToLog(ctToSS: dict,keepSuccDupes) -> dict :
 def reportLogStats(sslog: dict,logname: str = None):
     result = ""
     if logname:
-        result += f"== Log: {logname} ==\n"
+        result += f"== Log: {logname} == \n    @ {datetime.now()}\n"
     result += f"  Cases: {len(sslog)}"
     states = 0
     minRoles = 1
