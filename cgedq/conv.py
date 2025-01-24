@@ -626,14 +626,16 @@ def load_datasets(fin,rebuild_db,tmlin,inputtype,datadir,firstrows=0) \
     if inputtype == 'clean':
         cq = process_clean_cgedq(fin)
     events = filter_basic(cq)
+    info(f"Loaded and filtered at {datetime.now()}")
     (officials,positions,appointments) = normalize_events(events,trans)
+    info(f"Rebuilding at {datetime.now()}")
     if rebuild_db:
         # Refers to rebuilding the originating record tables
         # Only needed when new data dump or hanzi normalization changes
         recreate_event_db(officials,positions,appointments,events,tmlrec) 
     else:
         recreate_event_db(officials,positions,appointments) 
-    info(f"Loaded at {datetime.now()}")
+    info(f"Fully loaded at {datetime.now()}")
     dsname = inputtype
     ds = CGEDQDatasets(dsname,events,tmlrec,officials,positions,appointments,
                        trans)
