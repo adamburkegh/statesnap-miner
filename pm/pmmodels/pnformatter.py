@@ -86,7 +86,6 @@ FINAL_NAME = 'F'
 FINAL_ARC_OVERFLOW = 20
 
 def picky_arc(arc:Arc) -> bool:
-    # print(f'picky_arc({arc})')
     return  (isinstance(arc.to_node,Transition) and arc.to_node.picky ) or \
             (isinstance(arc.from_node,Transition) and arc.from_node.picky ) 
 
