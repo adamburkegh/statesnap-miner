@@ -9,6 +9,7 @@ Position,Pinyin,Translation,Source
 博士師,boshishi,Erudite,Hucker
 捕盗廳,Budao Ti,District Jailor,AB
 捕廳,Bu Ti,District Jailor,Hucker
+布政使,buzhengshi,Provincial Administration Commission,Hou
 漕標中軍副將,caobiao zhongjun fujiang,Brigadier River Transport ,AB
 叅將,canjiang,Staff Captain,WP
 春坊,chunfang,Secretariat of the Heir Apparent,Hucker
@@ -19,6 +20,7 @@ Position,Pinyin,Translation,Source
 典史,dianshi,District Jailor,Chen
 督標中軍副將,dubiao zhongjun fujiang,Brigadier of the Middle Provincial Army,AB
 都察院都御史,duchuyuan duyushi,Chief Censor,AB
+督理,duli,Supervisory Manager,AB
 都御史,duyushi,Chief Censor,Hucker
 分巡道,fenxun dao,Vice Commissioner of Surveillance Circuit,Hucker
 分巡兵備道,fenxun bingbei dao,General Surveillance and Military Defense Circuit,Hucker
@@ -140,7 +142,7 @@ Position,Pinyin,Translation,Source
 掌...道監察御史,zhang ... <region> dao jianchayushi,Investigating Censor of the ... Provincial Circuit,AB
 正考官,zhengkaoguan,Principal Examiner,Hucker
 正主考,zhengzhukao,Principal Chief Examiner,AB
-政使,zhengshi,Principal Administration Commission,Hou
+政使,zhengshi,Provincial Administration Commission,Hou
 正指揮,zhengzhihui,Principal Commander,AB
 正總裁,zhengzongcai,Senior Director-General,AB
 知府,zhifu,Prefect,Chen
@@ -159,4 +161,5 @@ Position,Pinyin,Translation,Source
 總兵官,zongbingguan,Commander,WP
 總裁,zongcai,Chairman,WT
 總裁,zongcai,Director-General,Hucker
+總理,zongli,Superintendant,Hucker
 總師傅,zongshifu,Chief Master [shifu],AB
