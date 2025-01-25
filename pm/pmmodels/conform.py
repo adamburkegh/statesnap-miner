@@ -17,7 +17,6 @@ def place_tuple_key(pt):
 def sort_place_tuple_seq(ptl):
     result = []
     for entry in sorted(ptl,key=place_tuple_key):
-        # result.append(  place_tuple_key(entry) )
         result.append( entry )
     return tuple(result)
 
@@ -25,7 +24,6 @@ def freeze_semantics(semantics:PetriNetSemantics):
     return freeze_mark(semantics.marking())
 
 def freeze_mark(marking:Marking):
-    # return tuple(sorted(marking.mark.items()))
     return sort_place_tuple_seq(marking.mark.items())
 
 def reachable_markings(semantics:PetriNetSemantics,visited:set=set(),level=0) \
