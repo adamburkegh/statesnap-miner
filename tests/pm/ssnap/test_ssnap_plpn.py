@@ -4,7 +4,7 @@ import os.path
 import unittest
 
 from pm.ssnap.ssnap import (StateSnapshot, sslogFromCSV, sslogWithRanges, 
-                         pruneForNoise, arcsSpanningTran)
+                         pruneForNoiseByTranWeight, arcsSpanningTran)
 from pm.ssnap import ssnap
 from pmkoalas.models.petrinet import *
 from pmkoalas.models.pnfrag import *
@@ -281,9 +281,9 @@ class StateSnapshotMinerTest(unittest.TestCase):
         self.add(hedge,  "I -> {tau__3 100.0} -> Student")
         expected = self.net("I -> {tau__1 341.0} -> Sweep")
         self.add(expected,"I -> {tau__3 100.0} -> Student")
-        result = pruneForNoise(hedge,0.01)
+        result = pruneForNoiseByTranWeight(hedge,0.01)
         self.assertNetEqual( expected, result )
-        result = pruneForNoise(hedge,0.001)
+        result = pruneForNoiseByTranWeight(hedge,0.001)
         self.assertNetEqual( hedge, result )
 
     def test_add_spanning_tran(self):
