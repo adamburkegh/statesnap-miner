@@ -340,9 +340,29 @@ def sslogFromCSV(csvfile,caseIdCol,activityCol,timeCol,keepSuccDupes=True,
                            types, encoding)
     return sslog
 
+
+
+def sslogToCSV(sslog: dict, csvfile: str, caseIdCol,activityCol,timeCol,
+               encoding='utf-8' ) -> set :
+    '''
+    Export a state snapshot log to a CSV with a header.
+    '''
+    with open(csvfile,'w',encoding=encoding) as csvf:
+        writer = csv.DictWriter(csvf,
+                                fieldnames=[caseIdCol,activityCol,timeCol] )
+        writer.writeheader()
+        for caseId in sslog:
+            trace = sslog[caseId]
+            for ss in trace:
+                for role in ss.activities:
+                    row = {caseIdCol: caseId, activityCol: role,
+                                   timeCol:ss.time }
+                    writer.writerow( row )
+
+
 def sslogWithRanges(csvfile,caseIdCol,activityCol,timeColStart,timeColEnd,
                     timeInc=0.25, keepSuccDupes=True, types : dict = None, 
-                    encoding='utf-8' ) -> set :
+                    encoding='utf-8' ) -> dict :
     '''
     Load a state snapshot log from a CSV with a header. The file is expected 
     to be normalised on the time dimension by using time ranges in columns
@@ -381,10 +401,10 @@ def sslogParse(rowData,caseIdCol,activityCol,timeCol,keepSuccDupes=True,
         else:
             ss = StateSnapshot(caseId,time,set([activity]) )
         ctToSS[(caseId,time)] = ss
-    return ssSetToLog(ctToSS,keepSuccDupes)
+    return ssDictToLog(ctToSS,keepSuccDupes)
 
 
-def ssSetToLog(ctToSS: dict,keepSuccDupes) -> dict :
+def ssDictToLog(ctToSS: dict,keepSuccDupes) -> dict :
     sslog = dict()
     prevState = None
     ctTrace = []
@@ -445,4 +465,22 @@ def noiseReduceByVariant(sslog: dict, noiseThreshold) -> dict:
             result[ss] = sslog[ss]
     return result
 
+def take_tails(sslog: dict, role, min_length:int=1) -> dict:
+    '''
+    Truncates each trace before the first occurrence of role. Returns sslog.
+    '''
+    result = {}
+    for caseId in sslog:
+        trace = sslog[caseId]
+        newTrace = []
+        inTail = False
+        for ss in trace:
+            if inTail:
+                newTrace.append(ss)
+            if role in ss.activities:
+                inTail = True
+                newTrace.append(ss)
+        if len(newTrace) >= min_length:
+            result[caseId] = newTrace
+    return result
 

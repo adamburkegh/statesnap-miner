@@ -43,4 +43,27 @@ class StateSnapshotLogTest(unittest.TestCase):
                                     set(['Sweep']) ) ] }
         self.assertEqual(expected,result)
 
+    def test_take_tails(self):
+        sslog = {1: [ StateSnapshot(1,1700,
+                                    set(['Student'])),
+                      StateSnapshot(1,1701,
+                                    set(['Sweep'])),
+                      StateSnapshot(1,1702,
+                                    set(['Drone'])) ],
+                 2: [ StateSnapshot(2,1701,
+                                    set(['Sweep']) ),
+                      StateSnapshot(2,1705,
+                                    set(['CEO']))] ,
+                 3: [ StateSnapshot(3,1705,
+                                    set(['Sweep']) ) ] }
+        result = take_tails(sslog,'Sweep',2)
+        elog =  {1: [ StateSnapshot(1,1701,
+                                    set(['Sweep'])),
+                      StateSnapshot(1,1702,
+                                    set(['Drone'])) ],
+                 2: [ StateSnapshot(2,1701,
+                                    set(['Sweep']) ),
+                      StateSnapshot(2,1705,
+                                    set(['CEO']))] } 
+        self.assertEqual(elog,result)
 
