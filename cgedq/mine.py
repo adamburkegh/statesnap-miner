@@ -21,7 +21,8 @@ from pm.pmmodels.pnformatter \
         import (ScaledFormatter, exportNetToScaledImage, 
                 exportRoleStateNetToImage )
 import pm.pmmodels.pm4pyviz
-from pm.ssnap.ssnap import mine, sslogFromCSV, sslogWithRanges, reportLogStats
+from pm.ssnap.ssnap import mine, minePLPN, \
+    sslogFromCSV, sslogWithRanges, reportLogStats
 
 
 setLogLevel(logging.INFO)
@@ -150,16 +151,19 @@ def exportNetToImage(vard,oname,pn):
 def mineByTime(vard,fname,sslog:set,years:int,noise=0.0,font=None,final=True):
     sslogn = filterByTimeOnInt(sslog, years)
     reportLogStats(sslogn, fname+ "_y" + str(years))
-    pn = mine(sslogn,label=fname,noiseThreshold=noise,final=final)
-    tsum = sum([tran.weight for tran in pn.transitions])
-    info(f'Total weights: {tsum} ... weight threshold: {noise*tsum}')
+    rsn = mine(sslogn,label=fname,noiseThreshold=noise,final=final)
+    #tsum = sum([tran.weight for tran in rsn.transitions])
+    #info(f'Total weights: {tsum} ... weight threshold: {noise*tsum}')
     #exportNetToScaledImage(vard,
     #        f"{fname}_n{10000*noise:04.0f}_ss{str(years).zfill(3)}y",pn,sslog,
     #        font)
     exportRoleStateNetToImage(vard,
-            f"{fname}_n{10000*noise:04.0f}_ss{str(years).zfill(3)}y",pn,sslog,
-            font)
-    # exportNetToImage(vard,f"{fname}_ss{str(years).zfill(3)}y",pn)
+            f"{fname}_n{10000*noise:04.0f}_ss{str(years).zfill(3)}y_rsn",rsn,
+                              sslog, font)
+    plpn = minePLPN(sslogn,label=fname,noiseThreshold=noise,final=False)
+    exportNetToScaledImage(vard,
+            f"{fname}_n{10000*noise:04.0f}_ss{str(years).zfill(3)}y_plpn",plpn,
+                           sslog, font)
 
 
 def mineJobStatesByRange(vard:str,fid:str,noise:float,years:list,final=True):

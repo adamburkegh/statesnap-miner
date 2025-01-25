@@ -10,12 +10,12 @@ from cgedq.logutil import *
 from cgedq.mine import mineJobStates, mineJobStatesByRange
 from cgedq.trans import loadplacetransfile
 
-logger = logging.logger( __name__ )
+logger = logging.getLogger( __name__ )
 # logger.setLevel( logging.DEBUG )
 
 
 def mine_export_job(job,tag,jevents,tmlrec,officials,positions,appointments,
-                    rtrans, noise=0,pfloor=0):
+                    rtrans, topn, noise=0):
     add_translations(jevents,rtrans)
     events = jevents.merge(tmlrec,on=['person_id','year'])
     info(f"Merged columns {list(events.columns.values)}")
@@ -37,26 +37,26 @@ def mine_export_job(job,tag,jevents,tmlrec,officials,positions,appointments,
         print( f'No events after filtering for mid-career officials' )
         return
     extract_norm_events(jinit,tag,
-                    officials,positions,appointments,topn=10 )
+                    officials,positions,appointments,topn=topn )
     mineJobStatesByRange('var',tag,noise=noise,years=[15,20])
     # mineJobStatesByRange('var',tag,noise=noise,years=[5,10,15,20,25,80])
     # mineJobStatesByRange('var','top'+tag,noise=2*noise,years=[5,10,15,20,25,80])
 
 
 
-def mine_by_job(job,tag,noise,fin,rebuild_db,tmlin,inputtype,datadir):
+def mine_by_job(job,tag,noise,fin,rebuild_db,tmlin,inputtype,datadir,topn=10):
     info(f"Started at {datetime.now()}")
     ds = load_datasets(fin,rebuild_db,tmlin,inputtype,datadir)
     mine_export_job(job,tag,ds.events,ds.tmlrec,ds.officials,
-                    ds.positions,ds.appointments,ds.trans,noise)
+                    ds.positions,ds.appointments,ds.trans,topn,noise)
     info(f"Finished at {datetime.now()}")
 
 
 def main():
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
     args = main_parse()
     mine_by_job('知縣','jmagistrate', 0.0005, args.cgedqfile,args.rebuild,
-                args.tmlfile, args.inputtype, args.datadir)
+                args.tmlfile, args.inputtype, args.datadir,topn=12)
     #mine_by_job('知縣','jmagistrate', 0.001, args.cgedqfile,args.rebuild,
     #            args.tmlfile, args.inputtype, args.datadir)
     # mine_by_job('文淵閣校理','jprofound', 0.002, args.cgedqfile,args.rebuild,
