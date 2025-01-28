@@ -34,6 +34,7 @@ root = logging.getLogger()
 
 plog = PrintLogger('')
 plog.setLevel(logging.INFO)
+# plog.setLevel(logging.WARN)
 
 
 debug   = plog.debug
