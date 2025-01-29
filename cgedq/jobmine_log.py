@@ -22,7 +22,7 @@ def magtails():
     tag = 'jmagtails' # sys.argv[1]
     # noise = 0.0005  # mess
     # noise = 0.001   # blows stack for RSN
-    # noise = 0.002 
+    noise = 0.002 
     # noise = 0.003
     # noise = 0.01
     years = 25
@@ -42,6 +42,43 @@ def magtails():
                final=False)
 
 
+def magintendant():
+    tag = 'jmagintend' # sys.argv[1]
+    # noise = 0.0005  # mess
+    # noise = 0.001   # blows stack for RSN
+    # noise = 0.002 
+    # noise = 0.003
+    noise = 0.01
+    years = 25
+    fname = f'cged-q-{tag}'
+    vard = 'var'
+    logfile = os.path.join(vard,fname+'.csv')
+    sslog = sslogFromCSV(logfile,
+                         caseIdCol='person_id',activityCol='synjob',
+                         timeCol='year',
+                         types = {'year':float },
+                         keepSuccDupes=False)
+    minePLPNByTime(vard=vard,fname=fname,sslog=sslog,years=years,noise=noise,
+               final=False)
+
+
+def magintendanttop():
+    tag = 'jmagintendtop' # sys.argv[1]
+    # noise = 0.01
+    noise=0.0
+    years = 25
+    fname = f'cged-q-{tag}'
+    vard = 'var'
+    logfile = os.path.join(vard,fname+'.csv')
+    sslog = sslogFromCSV(logfile,
+                         caseIdCol='person_id',activityCol='synjob',
+                         timeCol='year',
+                         types = {'year':float },
+                         keepSuccDupes=False)
+    minePLPNByTime(vard=vard,fname=fname,sslog=sslog,years=years,noise=noise,
+               final=False)
+
+
 def mag():
     tag = 'jmagistrate' # sys.argv[1]
     tag = 'jmagtails' # sys.argv[1]
@@ -54,5 +91,7 @@ def mag():
 
 
 if __name__ == '__main__':
-    magtails()
+    # magtails()
+    # magintendant()
+    magintendanttop()
 
