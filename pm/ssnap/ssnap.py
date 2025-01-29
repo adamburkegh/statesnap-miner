@@ -345,7 +345,7 @@ def sslogFromCSV(csvfile,caseIdCol,activityCol,timeCol,keepSuccDupes=True,
 def sslogToCSV(sslog: dict, csvfile: str, caseIdCol,activityCol,timeCol,
                encoding='utf-8' ) -> set :
     '''
-    Export a state snapshot log to a CSV with a header.
+    Export a state snapshot log to a CSV file with a header.
     '''
     with open(csvfile,'w',encoding=encoding) as csvf:
         writer = csv.DictWriter(csvf,
@@ -483,4 +483,52 @@ def take_tails(sslog: dict, role, min_length:int=1) -> dict:
         if len(newTrace) >= min_length:
             result[caseId] = newTrace
     return result
+
+
+def filter_by_role(sslog: dict, role) -> dict:
+    '''
+    Keep only traces with role. Returns sslog.
+    '''
+    result = {}
+    for caseId in sslog:
+        trace = sslog[caseId]
+        inTail = False
+        for ss in trace:
+            if role in ss.activities:
+                result[caseId] = trace
+                continue
+    return result
+
+
+def keep_top_roles(sslog: dict, keeptop:int, drop=False, 
+                   conflaterole='other') -> dict:
+    '''
+    Replace most frequent roles, as determined by keeptop. Conflate remaining
+    roles into single role with label conflaterole. Returns sslog.
+    '''
+    result = {}
+    rolefreq = defaultdict(int)
+    for caseId in sslog:
+        trace = sslog[caseId]
+        for ss in trace:
+            for role in ss.activities:
+                rolefreq[role] += 1
+    toproles = sorted([(-value,role) for (role,value) in rolefreq.items()])
+    toproles = [role for (value,role) in toproles][:keeptop]
+    for caseId in sslog:
+        trace = sslog[caseId]
+        newTrace = []
+        inTail = False
+        for ss in trace:
+            if drop:
+                newact = [role for role in ss.activities if role in toproles]
+            else:
+                newact = [role if role in toproles else conflaterole \
+                            for role in ss.activities]
+            newss = StateSnapshot(ss.caseId,ss.time,frozenset(newact) )
+            newTrace.append(newss)
+        result[caseId] = newTrace
+    return result
+
+
 
