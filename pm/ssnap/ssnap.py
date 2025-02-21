@@ -153,7 +153,8 @@ def minePurePLPN(sslog: dict,label=None,final=True) -> LabelledPetriNet:
                              arcs = arcs, name=label )
 
 def addRSNetFinalTransitions(partialNet, atot, atop, tranId, tweights, arcs, 
-                             initialPlace, finalPlace, finals, finalRS):
+                             initialPlace, finalPlace, finals, finalRS,
+                             unobservedWeight=0.8):
     '''
     Mutates input parameters, particularly atot and arcs.
     '''
@@ -185,7 +186,7 @@ def addRSNetFinalTransitions(partialNet, atot, atop, tranId, tweights, arcs,
         if fPlaceNames in finals:
             tweights[tran] = finals[fPlaceNames]
         else:
-            tweights[tran] = 1
+            tweights[tran] = unobservedWeight
             tran.observed = False
         atot[(fPlaceNames,finalRS)] = tran
         tranId = max(tranId,tran.tid)
@@ -497,6 +498,24 @@ def filter_by_role(sslog: dict, role) -> dict:
             if role in ss.activities:
                 result[caseId] = trace
                 continue
+    return result
+
+def filter_by_roleset(sslog: dict, roles: list) -> dict:
+    '''
+    Keep only traces with an entry with all roles. Returns sslog.
+    '''
+    result = {}
+    for caseId in sslog:
+        trace = sslog[caseId]
+        inTail = False
+        for ss in trace:
+            found = True
+            for role in roles:
+                if role not in ss.activities:
+                    found = False
+                    continue
+            if found:
+                result[caseId] = trace
     return result
 
 
