@@ -15,6 +15,7 @@ Position,Pinyin,Translation,Source
 春坊,chunfang,Secretariat of the Heir Apparent,Hucker
 春坊庶子,chunfang,Mentor of the Secretariat of the Heir Apparent,Hucker
 大臣,dachen,Grand Minister,Hucker
+大使,dashi,Agency Commissioner,Hucker
 大學士,daxueshi,Grand Secretary,Hucker
 大學士稽察欽奉上諭事件處,daxueshi jicha yinfeng shangyu shijianchu,Grand Secretary of the Office for the Distribution of Imperial Pronouncements,Hucker
 典史,dianshi,District Jailor,Chen
@@ -114,6 +115,7 @@ Position,Pinyin,Translation,Source
 頭品頂戴,touping dingdai,First Button,AB
 文淵閣校理,Wenyuan ge xiaoli,Hall of Literary Profundity,Hucker
 小京官,xiaojingguan,Minor Capital Official,Chen
+縣丞,xiancheng,County Vice Magistrate,Hucker
 協辦大學士,xieban daxueshi,Assistant Grand Secretary,Hucker
 洗馬,xima,Librarian to the Heir Apparent,Hucker
 學士,xueshi,Academician,Chen
@@ -153,6 +155,8 @@ Position,Pinyin,Translation,Source
 中書,zhongshu,Secretary (Clerk),Hucker
 中書,zhongshu,Secretary,Chen
 中允,zhongyun,Companion to the Heir Apparent,Hucker
+州同,zhoutong,Department Vice Magistrate,
+州判,zhoupan,Assistant Department Magistrate,Hucker
 狀元,zhuangyan,Optimus (highest jinshi exam place),Chen
 主考,zhukao,Provincial Examiner,Hucker
 主考,zhukao,Chief Examiner,WT
