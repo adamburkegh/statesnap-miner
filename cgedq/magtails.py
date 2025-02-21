@@ -13,6 +13,16 @@ from cgedq.logutil import *
 from pm.ssnap.ssnap import (sslogWithRanges, sslogToCSV, filter_by_role, 
                             keep_top_roles, take_tails)
 
+def magcount(logfile):
+    info(f"Loading ... {logfile}" )
+    sslog = sslogWithRanges(logfile,
+                         caseIdCol='person_id',activityCol='synjob',
+                         timeColStart='start_year',timeColEnd='end_year',
+                         types = {'start_year':float,'end_year':float  },
+                         keepSuccDupes=False)
+    info(len(sslog))
+
+
 def magtails(role,logfile,newlogpath):
     info(f"Loading ... {logfile}" )
     sslog = sslogWithRanges(logfile,
@@ -56,12 +66,13 @@ def magintendanttailstop(logfile,newlogpath):
 
 
 if __name__ == '__main__':
-    fname = 'var/cged-q-jmagistrate.csv'
+    fname = 'var/cged-q-jmagfull.csv'
     ftail = 'var/cged-q-jmagtails.csv'
-    #magtails('知縣',fname,ftail)
+    magtails('知縣',fname,ftail)
     # magintendanttails(fname,'var/cged-q-jmagintend.csv')
-    magintendanttailstop(fname,
-                         'var/cged-q-jmagintendtop.csv')
+    # magintendanttailstop(fname,
+    #                      'var/cged-q-jmagintendtop.csv')
+    # magcount(fname)
 
 
 

@@ -36,10 +36,10 @@ def magtails():
                          keepSuccDupes=False)
     # reportLogStats(sslog,oname)
     # info("Mining states ..." )
-    # mineByTime(vard=vard,fname=fname,sslog=sslog,years=years,noise=noise,
-    #           final=True)
-    minePLPNByTime(vard=vard,fname=fname,sslog=sslog,years=years,noise=noise,
-               final=False)
+    mineByTime(vard=vard,fname=fname,sslog=sslog,years=years,noise=noise,
+               final=True)
+    # minePLPNByTime(vard=vard,fname=fname,sslog=sslog,years=years,noise=noise,
+    #            final=False)
 
 
 def magintendant():
@@ -80,18 +80,20 @@ def magintendanttop():
 
 
 def mag():
-    tag = 'jmagistrate' # sys.argv[1]
-    tag = 'jmagtails' # sys.argv[1]
+    tag = 'jmagfull' # sys.argv[1]
+    # tag = 'topjmagfull' # sys.argv[1]
     # noise = 0.0002      # blows stack using trace-variant noise reduction
-    noise = 0.0005
+    # noise = 0.001
     # noise = 0.001 
     # noise = 0.002 
-    mineJobStatesByRange('var',tag,noise,years=[10,15,20,25,60])
-    #mineJobStatesByRange('var',tag,noise,years=[10])
+    for noise in [0.001, 0.002, 0.005]:
+        mineJobStatesByRange('var',tag,noise,years=[10,15,20,25])
+        #mineJobStatesByRange('var',tag,noise,years=[10])
 
 
 if __name__ == '__main__':
+    mag()
     # magtails()
     # magintendant()
-    magintendanttop()
+    # magintendanttop()
 
