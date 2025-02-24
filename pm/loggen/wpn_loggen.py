@@ -10,6 +10,7 @@ import math
 
 from pm.ssnap.ssnap import StateSnapshot
 from pm.pmmodels.plpn import *
+from pm.pmmodels.rsnet import RoleStateNet, RoleStateNetSemantics
 
 
 '''
@@ -96,10 +97,11 @@ class WeightedTokenGameStateLogGenerator:
         if leftover:
             self.allocate_leftover(tow,leftover)
         for tran in enabled:
-            new_mark = self.semantics.remark(tran)
-            sublog = self.generate_from_mark(new_mark,tow[tran],new_trace)
-            self.semantics.mark = ct_mark
-            result = bag_union( result, sublog)
+            if tow[tran] > 0:
+                new_mark = self.semantics.remark(tran)
+                sublog = self.generate_from_mark(new_mark,tow[tran],new_trace)
+                self.semantics.mark = ct_mark
+                result = bag_union( result, sublog)
         # debug( f"  continuation return {result} " )
         return result
 
@@ -133,4 +135,23 @@ def bag_union( dict1: dict, dict2: dict ):
     return result
 
 
+'''
+Generate log from a marking with a single initial place named by initial_place.
+'''
+def generate_log(rsn:RoleStateNet,size:int=1000,initial_place:str='I'):
+    init = findPlace(rsn,initial_place)
+    imark = singleton_marking(rsn, [init])
+    sem = RoleStateNetSemantics(imark)
+    gen = WeightedTokenGameStateLogGenerator(sem,size)
+    lg = gen.generate()
+    return lg
+
+
+def findPlace(net,label):
+    """
+    Return first node with this label
+    """
+    for place in net._places:
+        if label == place.name:
+            return place
 
