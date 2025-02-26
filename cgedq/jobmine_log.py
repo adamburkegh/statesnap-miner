@@ -91,9 +91,16 @@ def mag():
         #mineJobStatesByRange('var',tag,noise,years=[10])
 
 
+def maggrad():
+    tag = 'jmaggrad' 
+    mineJobStatesByRange('var',tag,noise=0.002,years=[15])
+
+
 if __name__ == '__main__':
     mag()
+    # maggrad()
     # magtails()
     # magintendant()
     # magintendanttop()
+
 
