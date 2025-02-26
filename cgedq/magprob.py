@@ -8,6 +8,8 @@ import os.path
 from cgedq.logutil import *
 from cgedq.mine import filterByTimeOnInt
 from pm.loggen.wpn_loggen import generate_log
+from pm.metrics.relevance import relevance_uniform_roleset
+from pm.pmmodels.tracefreq import RoleTraceFrequency
 from pm.ssnap.ssnap import sslogFromCSV, sslogWithRanges, mine
 
 # setLogLevel(logging.DEBUG)
@@ -62,6 +64,26 @@ def sslog_to_summary(sslog):
     return result
 
 
+def rel(rep1,rep2,desc):
+    tf1 = RoleTraceFrequency(rep1)
+    tf2 = RoleTraceFrequency(rep2)
+    # info(tf1)
+    # info(tf2)
+    result = relevance_uniform_roleset(tf1,tf2)
+    info(f"{desc}: ... {result}" )
+
+def clip(rep1):
+    ''' 
+    Remove top and tail of each trace, particularly for when they are the 
+    I and F place labels.
+    '''
+    elements = {}
+    for trace in rep1:
+        ctrace = trace[1:-1]
+        elements[ctrace] = rep1[trace]
+    return elements
+
+
 def magprob():
     maglogname = 'var/cged-q-jmagfull.csv'
     tag='jmagfull'
@@ -103,6 +125,15 @@ def magprob():
     checklog(mgradlang)
     info(f"Log probabilities ... ")
     checklog(lglog)
+    #
+    info("Entropic Relevance ...")
+    mclip = clip(mlang)
+    mgradclip = clip(mgradlang)
+    rel(llog,lglog,"    magistrate all vs palace, log vs log")
+    rel(mclip,llog,"    magistrate all, model vs log")
+    rel(mgradclip,lglog,"    magistrate palace grads, model vs log")
+    rel(mclip,mgradclip,"    magistrate all vs palace, model vs model")
+    
 
 
 if __name__ == '__main__':

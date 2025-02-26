@@ -9,6 +9,7 @@ Uniform background model only.
 '''
 
 
+import logging
 import math
 
 from pm.pmmodels.tracefreq import *
@@ -19,7 +20,9 @@ from pm.pmmodels.tracefreq import *
 #     RESTRICTED_ZERO_ORDER = 3   # Future
 #     ROLE_SET_UNIFORM = 4        
 
-debug = print
+
+logger = logging.getLogger(__name__)
+debug = logger.debug
 
 
 def model_cost(modelTF: TraceFrequency, trace) -> float: 
