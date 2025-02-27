@@ -3,16 +3,21 @@ Calculating conformance metrics on magistrate models.
 '''
 
 from collections import defaultdict
+import logging
 import os.path
 
-from cgedq.logutil import *
 from cgedq.mine import filterByTimeOnInt
 from pm.loggen.wpn_loggen import generate_log
-from pm.metrics.relevance import relevance_uniform_roleset
+from pm.metrics.relevance import relevance_uniform_roleset, show_model_cost
+from pm.metrics.earthmovers import unit_earthmovers
 from pm.pmmodels.tracefreq import RoleTraceFrequency
 from pm.ssnap.ssnap import sslogFromCSV, sslogWithRanges, mine
 
-# setLogLevel(logging.DEBUG)
+logger = logging.getLogger(__name__)
+debug = logger.debug
+info = logger.info
+logging.basicConfig(level=logging.DEBUG, format="%(message)s")
+
 
 vard = 'var'
 
@@ -64,13 +69,21 @@ def sslog_to_summary(sslog):
     return result
 
 
-def rel(rep1,rep2,desc):
+def metrics(rep1,rep2,desc):
     tf1 = RoleTraceFrequency(rep1)
     tf2 = RoleTraceFrequency(rep2)
     # info(tf1)
     # info(tf2)
     result = relevance_uniform_roleset(tf1,tf2)
+    #info(f"    Entropic model cost")
+    #show_model_cost(tf1,"tf1")
+    #show_model_cost(tf2,"tf2")
+    info(f"    Entropic relevance")
     info(f"{desc}: ... {result}" )
+    result = unit_earthmovers(tf1,tf2)
+    info(f"    Unit earth movers")
+    info(f"{desc}: ... {result}" )
+
 
 def clip(rep1):
     ''' 
@@ -126,13 +139,13 @@ def magprob():
     info(f"Log probabilities ... ")
     checklog(lglog)
     #
-    info("Entropic Relevance ...")
+    info("Metrics ...")
     mclip = clip(mlang)
     mgradclip = clip(mgradlang)
-    rel(llog,lglog,"    magistrate all vs palace, log vs log")
-    rel(mclip,llog,"    magistrate all, model vs log")
-    rel(mgradclip,lglog,"    magistrate palace grads, model vs log")
-    rel(mclip,mgradclip,"    magistrate all vs palace, model vs model")
+    metrics(llog,lglog,"    magistrate all vs palace, log vs log")
+    metrics(mclip,llog,"    magistrate all, model vs log")
+    metrics(mgradclip,lglog,"    magistrate palace grads, model vs log")
+    metrics(mclip,mgradclip,"    magistrate all vs palace, model vs model")
     
 
 
