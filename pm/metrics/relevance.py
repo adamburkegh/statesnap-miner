@@ -23,6 +23,7 @@ from pm.pmmodels.tracefreq import *
 
 logger = logging.getLogger(__name__)
 debug = logger.debug
+info = logger.info
 
 
 def model_cost(modelTF: TraceFrequency, trace) -> float: 
@@ -75,11 +76,11 @@ def trace_compression_cost(logTF: TraceFrequency,
         if mf > 0:
             cost = logTF.freq(trace) * model_cost(modelTF,trace)
             mc += cost
-            # debug(f'Compression model cost: {trace!s:33} {cost}')
+            debug(f'Compression model cost: {trace!s:33} {cost}')
         else:
             cost = logTF.freq(trace) * background_cost(logTF,trace)
             bgc += cost
-            # debug(f'Compression bg cost: {trace!s:33} {cost}')
+            debug(f'Compression bg cost: {trace!s:33} {cost}')
         lsum += cost
     return lsum / logTF.trace_total()
 
@@ -110,5 +111,13 @@ Entropic relevance with uniform roleset background cost model.
 def relevance_uniform_roleset(logTF: TraceFrequency, 
                               modelTF: TraceFrequency) -> float:
     return relevance(logTF,modelTF,uniform_role_background_cost)
+
+
+
+def show_model_cost(tf,name):
+    info( f'Model TF {name}')
+    for trace in tf.traces():
+        info( f'{trace!s:30}  ... {model_cost(tf,trace)}' )
+    info('+++')
 
 

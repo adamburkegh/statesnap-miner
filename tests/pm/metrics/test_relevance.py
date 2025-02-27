@@ -136,10 +136,5 @@ class EntropicRelevanceTest(unittest.TestCase):
         show_model_cost(mtf_sa2,'MTF SA2')
 
 
-def show_model_cost(tf,name):
-    print( f'Model TF {name}') 
-    for trace in tf.traces():
-        print( f'{trace!s:30}  ... {model_cost(tf,trace)}' )
-    print('+++')   
 
 
