@@ -12,6 +12,7 @@ Uniform background model only.
 import logging
 import math
 
+from pm.logs.statesnaplog import format_trace
 from pm.pmmodels.tracefreq import *
 
 # class BackgroundModel(Enum):
@@ -76,11 +77,11 @@ def trace_compression_cost(logTF: TraceFrequency,
         if mf > 0:
             cost = logTF.freq(trace) * model_cost(modelTF,trace)
             mc += cost
-            debug(f'Compression model cost: {trace!s:33} {cost}')
+            debug(f'Compression model cost: {format_trace(trace)!s:33} {cost}')
         else:
             cost = logTF.freq(trace) * background_cost(logTF,trace)
             bgc += cost
-            debug(f'Compression bg cost: {trace!s:33} {cost}')
+            debug(f'Compression bg cost: {format_trace(trace)!s:33} {cost}')
         lsum += cost
     return lsum / logTF.trace_total()
 

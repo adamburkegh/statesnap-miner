@@ -8,6 +8,9 @@ from collections import defaultdict
 import csv
 
 
+
+
+
 class StateSnapshot:
     def __init__(self,caseId,time,activities):
         self._caseId = caseId
@@ -267,4 +270,18 @@ def keep_top_roles(sslog: dict, keeptop:int, drop=False,
             newTrace.append(newss)
         result[caseId] = newTrace
     return result
+
+
+def format_trace(trace):
+    outstr = "["
+    first = True
+    for ss in trace:
+        if first:
+            first = False
+        else:
+            outstr += ", "
+        outstr += f"{set(ss)}"
+    outstr += "]"
+    return outstr
+
 
