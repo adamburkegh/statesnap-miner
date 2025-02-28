@@ -7,6 +7,7 @@ import logging
 import os.path
 
 from cgedq.mine import filterByTimeOnInt
+from pm.logs.statesnaplog import noiseReduceByVariant
 from pm.loggen.wpn_loggen import generate_log
 from pm.metrics.relevance import relevance_uniform_roleset, show_model_cost
 from pm.metrics.earthmovers import unit_earthmovers
@@ -16,22 +17,12 @@ from pm.ssnap.ssnap import sslogFromCSV, sslogWithRanges, mine
 logger = logging.getLogger(__name__)
 debug = logger.debug
 info = logger.info
-logging.basicConfig(level=logging.DEBUG, format="%(message)s")
+#logging.basicConfig(level=logging.DEBUG, format="%(message)s")
+logging.basicConfig(level=logging.INFO, format="%(message)s")
 
 
 vard = 'var'
 
-def formatTrace(trace):
-    outstr = "["
-    first = True
-    for ss in trace:
-        if first:
-            first = False
-        else:
-            outstr += ", "
-        outstr += f"{set(ss)}"
-    outstr += "]"
-    return outstr
 
 
 def checklog(log):
@@ -52,10 +43,10 @@ def checklog(log):
                 sec += log[trace]
         if trace == magtrace or trace == magtracem:
             mm += log[trace]
-    info( f"Log size: {lsum}")
-    info( f"   Probability of Secretary: {sec/lsum}")
-    info( f"   Probability of Secretary and Magistrate joint role: {sm/lsum}")
-    info( f"   Probability of Magistrate only: {mm/lsum}")
+    info( f"  Size: {lsum}")
+    info( f"    Probability of Secretary: {sec/lsum}")
+    info( f"    Probability of Secretary and Magistrate joint role: {sm/lsum}")
+    info( f"    Probability of Magistrate only: {mm/lsum}")
 
 def sslog_to_summary(sslog):
     result = defaultdict(int)
@@ -102,6 +93,8 @@ def magprob():
     tag='jmagfull'
     info("Magistrates")
     info(f"Loading ... {maglogname}" )
+    noise = 0.002
+    gensize = 10000
     # logfile = os.path.join(vard,maglogname+'.csv')
     sslogeng = sslogWithRanges(maglogname,
                          caseIdCol='person_id',activityCol='synjob_eng',
@@ -111,13 +104,17 @@ def magprob():
     # llog = sslog_to_summary(sslogeng)
     maglog = filterByTimeOnInt(sslogeng, years=15)
     llog = sslog_to_summary(maglog)
+    nlog = sslog_to_summary( noiseReduceByVariant(maglog,noise) )
     info(f"Discovering ... {tag}")
-    model = mine(maglog,label=tag,noiseThreshold=0.002,final=True)
+    model = mine(maglog,label=tag,noiseThreshold=noise,final=True)
     info(f"Calculating probabilities ... ")
-    mlang = generate_log(model,size=10000)
+    mlang = generate_log(model,size=gensize)
+    info(f"  Model probabilities ... ")
     checklog(mlang)
-    info(f"Log probabilities ... ")
+    info(f"  Log probabilities (noise) ... ")
     checklog(llog)
+    info(f"  Log probabilities (de-noised) ... ")
+    checklog(nlog)
     #
     info("Palace Grad Magistrates")
     maggradslogname = 'var/cged-q-jmaggrad.csv'
@@ -131,22 +128,30 @@ def magprob():
                          keepSuccDupes=False)   
     maggradlog = filterByTimeOnInt(ssgradlogeng, years=15)   
     lglog = sslog_to_summary(maggradlog)
+    nglog = sslog_to_summary( noiseReduceByVariant(maggradlog,noise) )
     info(f"Discovering ... {gradtag}")
-    gmodel = mine(maggradlog,label=gradtag,noiseThreshold=0.002,final=True)
+    gmodel = mine(maggradlog,label=gradtag,noiseThreshold=noise,final=True)
     info(f"Calculating probabilities ... ")
-    mgradlang = generate_log(gmodel,size=10000)
+    mgradlang = generate_log(gmodel,size=gensize)
+    info(f"  Model probabilities ... ")
     checklog(mgradlang)
-    info(f"Log probabilities ... ")
+    info(f"  Log probabilities (noise) ... ")
     checklog(lglog)
+    info(f"  Log probabilities (de-noised) ... ")
+    checklog(nglog)
     #
     info("Metrics ...")
     mclip = clip(mlang)
     mgradclip = clip(mgradlang)
-    metrics(llog,lglog,"    magistrate all vs palace, log vs log")
-    metrics(mclip,llog,"    magistrate all, model vs log")
-    metrics(mgradclip,lglog,"    magistrate palace grads, model vs log")
+    metrics(llog,lglog,"    magistrate all vs palace, noise, log vs log")
+    metrics(llog,mclip,"    magistrate all, noise, log vs model")
+    metrics(lglog,mgradclip,"    magistrate palace grads, noise, log vs model")
+    metrics(nlog,nglog,"    magistrate all vs palace, de-noise, log vs log")
+    metrics(nlog,mclip,"    magistrate all, de-noise, log vs model")
+    metrics(nglog,mgradclip,"    magistrate palace grads, de-noise, log vs model")
     metrics(mclip,mgradclip,"    magistrate all vs palace, model vs model")
-    
+    metrics(mgradclip,mclip,"    magistrate palace vs all, model vs model")
+
 
 
 if __name__ == '__main__':
