@@ -12,7 +12,6 @@ import logging
 from logging import debug, info
 from tests.pm import ssnap as tssnap
 
-mpath = os.path.abspath(tssnap.__path__[0])
 
 # logging.getLogger().setLevel(logging.DEBUG)
 
