@@ -33,6 +33,7 @@ class PrintLogger(logging.Logger):
 root = logging.getLogger()
 
 plog = PrintLogger('')
+# plog.setLevel(logging.DEBUG)
 plog.setLevel(logging.INFO)
 # plog.setLevel(logging.WARN)
 
