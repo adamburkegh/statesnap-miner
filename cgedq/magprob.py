@@ -9,7 +9,7 @@ import os.path
 from cgedq.mine import filterByTimeOnInt
 from pm.logs.statesnaplog import noiseReduceByVariant
 from pm.loggen.wpn_loggen import generate_log
-from pm.metrics.relevance import relevance_uniform_roleset, show_model_cost
+from pm.metrics.relevance import relevance_zero_order, show_model_cost
 from pm.metrics.earthmovers import unit_earthmovers
 from pm.pmmodels.tracefreq import RoleTraceFrequency
 from pm.ssnap.ssnap import sslogFromCSV, sslogWithRanges, mine
@@ -65,11 +65,11 @@ def metrics(rep1,rep2,desc):
     tf2 = RoleTraceFrequency(rep2)
     # info(tf1)
     # info(tf2)
-    result = relevance_uniform_roleset(tf1,tf2)
+    result = relevance_zero_order(tf1,tf2)
     #info(f"    Entropic model cost")
     #show_model_cost(tf1,"tf1")
     #show_model_cost(tf2,"tf2")
-    info(f"    Entropic relevance")
+    info(f"    Entropic relevance (zero order bg model)")
     info(f"{desc}: ... {result}" )
     result = unit_earthmovers(tf1,tf2)
     info(f"    Unit earth movers")
