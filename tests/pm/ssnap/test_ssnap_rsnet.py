@@ -12,12 +12,13 @@ from pm.ssnap import ssnap
 from pmkoalas.models.petrinet import *
 from pmkoalas.models.pnfrag import *
 from tests.pm.pmmodels.pnfragutil import findTransitionById, findPlaces
+from tests.pm.logutil import log_to_stdout
 
 
 logger = logging.getLogger()
 # logger.level = logging.DEBUG
-stream_handler = logging.StreamHandler(sys.stdout)
-logger.addHandler(stream_handler)
+log_to_stdout()
+
 
 
 def mine(sslog):
@@ -63,7 +64,7 @@ def makePicky(netToChange:LabelledPetriNet, tranIds:list):
 class StateSnapshotMinerRoleStateNetTest(unittest.TestCase):
 
     def setUp(self):
-        stream_handler.stream = sys.stdout
+        # stream_handler.stream = sys.stdout
         self.parser = PetriNetFragmentParser()
 
     def net(self,netText,label=None):

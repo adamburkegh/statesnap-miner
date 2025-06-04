@@ -1,4 +1,5 @@
 
+
 class TraceFrequency:
     def __init__(self,elements:dict = {}):
         self._elements = elements
@@ -28,8 +29,16 @@ class TraceFrequency:
     def traces(self):
         return self._elements.keys()
 
+
+    '''
+    Treat return value as read-only.
+    '''
+    def elements(self):
+        return self._elements
+
+
 class RoleTraceFrequency(TraceFrequency):
-    def __init__(self,elements:dict = {}):
+    def __init__(self, elements:dict = {}):
         self._elements = elements
         self._trace_total = sum( elements.values() )
         self._roles = \
@@ -43,4 +52,26 @@ class RoleTraceFrequency(TraceFrequency):
             traces += f'    {str(ts):40s}: {self._elements[t]:8d}\n'
         return f'TraceFrequency:\n    {len(self._roles)} roles: {self._roles}\n    {self._trace_total} traces\n{traces}'
 
+
+class EntryFrequency:
+    def __init__(self, tf: TraceFrequency ):
+        self._entries = {}
+        elements = tf.elements()
+        for trace in elements:
+            for entry in trace:
+                if entry in self._entries:
+                    self._entries[entry] += elements[trace]
+                else:
+                    self._entries[entry] = elements[trace]
+        self._entry_total = sum( self._entries.values() )
+
+    def entry_total(self):
+        return self._entry_total
+
+    def entry_freq(self,entry):
+        return self._entries[entry]
+
+    ''' Treat as read-only '''
+    def entries(self):
+        return self._entries
 

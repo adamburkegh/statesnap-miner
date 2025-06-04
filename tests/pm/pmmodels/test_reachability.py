@@ -10,10 +10,12 @@ from pm.pmmodels.plpn import Marking
 from pm.pmmodels.rsnet import RoleStateNetSemantics, to_rsnet
 
 from tests.pm.pmmodels.pnfragutil import *
+from tests.pm.logutil import log_to_stdout
+
 
 logger = logging.getLogger()
-stream_handler = logging.StreamHandler(sys.stdout)
-logger.addHandler(stream_handler)
+log_to_stdout()
+
 
 def place_tuple_key(pt):
     place, val = pt

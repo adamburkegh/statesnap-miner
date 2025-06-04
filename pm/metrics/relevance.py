@@ -17,7 +17,7 @@ from pm.pmmodels.tracefreq import *
 
 # class BackgroundModel(Enum):
 #     UNIFORM = 1
-#     ZERO_ORDER = 2              # Future
+#     ZERO_ORDER = 2              
 #     RESTRICTED_ZERO_ORDER = 3   # Future
 #     ROLE_SET_UNIFORM = 4        
 
@@ -46,6 +46,17 @@ def uniform_background_cost(logTF,trace):
 
 def uniform_role_background_cost(logTF,trace):
     return (len(trace) + 1) * math.log2( (2**logTF.role_total())+1 );
+
+# def zero_order_background_cost(logTF:TraceFrequency, roleFreq:EntryFrequency,
+#                                trace) -> float:
+#     roleCtWithTerminals = roleFreq.entry_total() + logTF.trace_total()
+#     sumv = 0
+#     for entry in trace:
+#         sumv += math.log2( roleFreq.entry_freq(entry) / roleCtWithTerminals)
+#     sumv += math.log2( logTF.trace_total() / roleCtWithTerminals )
+#     return -1*sumv
+
+
 
 background_cost = uniform_background_cost
 
@@ -83,27 +94,50 @@ def trace_compression_cost(logTF: TraceFrequency,
             bgc += cost
             debug(f'Compression bg cost: {format_trace(trace)!s:33} {cost}')
         lsum += cost
+    debug(f'Trace compression cost: {lsum / logTF.trace_total()}')
     return lsum / logTF.trace_total()
+
+
+def log2floor(x:float) -> float:
+    return math.floor(math.log2(x))
+
+def elias_gamma(x:float) -> float:
+    return 2 * log2floor(x) + 1
 
 
 def uniform_prelude_cost(logTF: TraceFrequency,modelTF: TraceFrequency):
     return 0
 
-prelude_cost = uniform_prelude_cost
+
+class RelevanceCalculator:
+    def relevance(self,logTF: TraceFrequency, modelTF: TraceFrequency) -> float:
+        return selector_cost(logTF,modelTF) \
+             + trace_compression_cost(logTF,modelTF,self.background_cost)\
+             + self.prelude_cost(logTF,modelTF)
 
 
-def relevance(logTF: TraceFrequency, modelTF: TraceFrequency,
-              background_cost) -> float:
-    return selector_cost(logTF,modelTF) \
-         + trace_compression_cost(logTF,modelTF,background_cost) \
-         + prelude_cost(logTF,modelTF)
+class UniformRelevanceCalculator(RelevanceCalculator):
+    def __init__(self):
+        self.prelude_cost = uniform_prelude_cost
+        self.background_cost = uniform_background_cost
+
+uniform_relevance_calculator = UniformRelevanceCalculator()
+
+
+
+class UniformRelevanceCalculator(RelevanceCalculator):
+    def __init__(self):
+        self.prelude_cost = uniform_prelude_cost
+        self.background_cost = uniform_role_background_cost
+
+uniform_relevance_roleset_calculator = UniformRelevanceCalculator()
 
 
 '''
 Entropic relevance with uniform background cost model.
 '''
 def relevance_uniform(logTF: TraceFrequency, modelTF: TraceFrequency) -> float:
-    return relevance(logTF,modelTF,uniform_background_cost)
+    return uniform_relevance_calculator.relevance(logTF, modelTF)
 
 
 '''
@@ -111,8 +145,55 @@ Entropic relevance with uniform roleset background cost model.
 '''
 def relevance_uniform_roleset(logTF: TraceFrequency, 
                               modelTF: TraceFrequency) -> float:
-    return relevance(logTF,modelTF,uniform_role_background_cost)
+    return uniform_relevance_roleset_calculator.relevance(logTF,modelTF)
 
+
+
+
+class ZeroOrderRelevanceCalculator(RelevanceCalculator):
+    def __init__(self,logTF,modelTF):
+        self.prelude_cost = \
+                lambda logTf, modelTf: \
+                    self.zero_order_prelude_cost(logTf)
+        self._roleFreq = EntryFrequency(logTF)
+        self.background_cost = \
+                lambda logTf, trace: \
+                        self.zero_order_background_cost(logTf,
+                                                        self._roleFreq,
+                                                        trace)
+        self._logTF = logTF
+        self._modelTF = modelTF
+
+
+    def zero_order_prelude_cost(self, logTF: TraceFrequency) -> float: 
+        entries = self._roleFreq.entries()
+        sum = 0
+        for entry in entries:
+            sum += elias_gamma( entries[entry]+1 )
+        return (sum + elias_gamma( logTF.trace_total() +1 ))/logTF.trace_total()
+
+    def zero_order_background_cost(self,logTF:TraceFrequency, 
+                                   roleFreq:EntryFrequency, trace) -> float:
+        debug(f'zero_order_bg {trace}')
+        roleCtWithTerminals = roleFreq.entry_total() + logTF.trace_total()
+        sumv = 0
+        for entry in trace:
+            entrybits =  math.log2( roleFreq.entry_freq(entry) / \
+                                    roleCtWithTerminals)
+            sumv += entrybits 
+            debug(f'    {entry}  ... {entrybits}')
+        sumv += math.log2( logTF.trace_total() / roleCtWithTerminals )
+        debug(f'    {-1*sumv}') 
+        return -1*sumv
+
+
+'''
+Entropic relevance with zero order background cost model.
+'''
+def relevance_zero_order(logTF: TraceFrequency, modelTF: TraceFrequency)  \
+        -> float:
+    zoc = ZeroOrderRelevanceCalculator(logTF,modelTF)
+    return zoc.relevance(logTF, modelTF)
 
 
 def show_model_cost(tf,name):
