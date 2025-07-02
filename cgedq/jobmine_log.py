@@ -18,6 +18,13 @@ def minePLPNByTime(vard,fname,sslog:set,years:int,noise=0.0,font=None,
             f"{fname}_n{10000*noise:04.0f}_ss{str(years).zfill(3)}y_plpn",plpn,
                            sslog, font)
 
+
+def init_trans():
+    trans = loadroletransfile()
+    return trans
+
+
+
 def magtails():
     tag = 'jmagtails' # sys.argv[1]
     # noise = 0.0005  # mess
@@ -86,9 +93,10 @@ def mag():
     # noise = 0.001
     # noise = 0.001 
     # noise = 0.002 
-    for noise in [0.001, 0.002, 0.005]:
-        mineJobStatesByRange('var',tag,noise,years=[10,15,20,25])
-        #mineJobStatesByRange('var',tag,noise,years=[10])
+    #for noise in [0.001, 0.002, 0.005]:
+    for noise in [0.002]:
+        #mineJobStatesByRange('var',tag,noise,years=[10,15,20,25])
+        mineJobStatesByRange('var',tag,noise,years=[15])
 
 
 def maggrad():

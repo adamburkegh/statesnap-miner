@@ -8,10 +8,19 @@ import logging
 from cgedq.conv import *
 from cgedq.logutil import * 
 from cgedq.mine import mineJobStates, mineJobStatesByRange
-from cgedq.trans import loadplacetransfile
+from cgedq.trans import loadplacetransfile, loadroletransfile, roletransobj
 
 logger = logging.getLogger( __name__ )
 # logger.setLevel( logging.DEBUG )
+
+
+def add_other_entries(trans):
+    for rank in ['no-rank','7-9','4-6']:
+        orank = 'other-' + rank
+        t = roletransobj( {'Position':orank, 'Translation': orank,
+                   'Pinyin': orank, 'Source':'Other' }  )
+        trans[orank] = t
+    return trans
 
 
 def mine_export_job(job,tag,jevents,tmlrec,officials,positions,appointments,
@@ -56,6 +65,7 @@ def mine_by_job(job,tag,noise,fin,rebuild_db,tmlin,inputtype,datadir,topn=10):
 
 
 def extract_events(tag,msg,ds,sjevents):
+    print(sjevents[['person_id','synjob']])
     jpeople  = sjevents['person_id'].unique()
     info(f'Found {len(jpeople)} officials')
     if len(sjevents) == 0:
@@ -63,7 +73,6 @@ def extract_events(tag,msg,ds,sjevents):
         return
     info(f'Found {len(sjevents)} events')
     events = sjevents[sjevents['person_id'].isin(jpeople) ]
-    rt = '(No translation)'
     jinit = selectfrominit(events,msg) 
     if len(jinit) == 0:
         print( f'No events after filtering for mid-career officials' )
@@ -85,6 +94,7 @@ def extract_grads_job(job,tag,fin,tmlin,inputtype,datadir):
     """ Extract grads with this job """
     info(f"Started at {datetime.now()}")
     ds = load_datasets(fin,False,tmlin,inputtype,datadir)
+    print(f"==== appointments {ds.appointments}")
     events = ds.events.merge(ds.tmlrec,on=['person_id','year'])
     info(f"Merged columns {list(events.columns.values)}")
     sjevents = events[events['synjob'].str.contains(job,na=False)].copy()
@@ -102,10 +112,10 @@ def main():
     #            args.tmlfile, args.inputtype, args.datadir)
     # mine_by_job('中允','jcomp', 0.002, args.cgedqfile,args.rebuild,
     #             args.tmlfile, args.inputtype, args.datadir)
-    #extract_by_job('知縣','jmagfull', args.cgedqfile, args.inputtype, 
-    #               args.datadir)
-    extract_grads_job('知縣','jmaggrad', args.cgedqfile, args.tmlfile, 
-                      args.inputtype, args.datadir)
+    extract_by_job('知縣','jmagfull', args.cgedqfile, args.inputtype, 
+                   args.datadir)
+    # extract_grads_job('知縣','jmaggrad', args.cgedqfile, args.tmlfile, 
+    #                   args.inputtype, args.datadir)
 
 
 if __name__ == "__main__":

@@ -6,7 +6,12 @@ role sets.
 
 from collections import defaultdict
 import csv
+from datetime import datetime
+import logging
 
+
+logger = logging.getLogger(__name__)
+info = logger.info
 
 
 

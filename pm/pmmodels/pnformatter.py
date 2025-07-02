@@ -201,8 +201,8 @@ def exportRoleStateNetDOT(net,sslog,font) -> str:
     return RoleStateNetFormatter(net,sslog,font,
                                  termination_weights=True).transform_net()
 
-def exportRoleStateNetToImage(vard,oname,pn,sslog,font):
+def exportRoleStateNetToImage(vard,oname,pn,sslog,font,imgformat='png'):
     dotStr = exportRoleStateNetDOT(pn,sslog,font)
-    export_DOT_to_image(vard,oname,dotStr) 
+    export_DOT_to_image(vard,oname,dotStr,imgformat) 
 
 

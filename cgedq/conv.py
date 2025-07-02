@@ -162,6 +162,8 @@ def extract_events(sevents,seventid,topn=12):
     export_events(sevents_blanks, seventid + 'blank')
 
 
+OTHER_ROLES = set(['other-' + rank for rank in ['1-3','4-6','7-9','no-rank']] )
+
 def extract_norm_events(sevents_in,seventid,officials,positions,appointments,
                         topn=12):
     sevents_blanks = sevents_in.loc[sevents_in[jobfield] == BLANK]
@@ -198,6 +200,9 @@ def extract_norm_events(sevents_in,seventid,officials,positions,appointments,
                 + sevents_restjobs['pinji_numeric'].astype(int).astype(str)
         sevents_topjobs = pd.concat([sevents_topjobs,sevents_restjobs],
                                       ignore_index=True)
+    # cleanup English translations
+    sevents.loc[sevents.synjob.isin(OTHER_ROLES),jobfieldeng] = \
+            sevents[jobfield]
     # sevents = collapse_continuing_roles(sevents)
     # debug(sevents.columns)
     #sevents_topjobs = collapse_continuing_roles(sevents_topjobs)
