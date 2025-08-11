@@ -7,13 +7,14 @@ import logging
 import os.path
 
 from cgedq.mine import filterByTimeOnInt
-from pm.logs.statesnaplog import noiseReduceByVariant
+from pm.logs.statesnaplog import noiseReduceByVariant, sslogFromCSV, \
+        sslogWithRanges
 from pm.loggen.wpn_loggen import generate_log
 from pm.metrics.relevance import relevance_uniform_roleset, \
         relevance_zero_order, show_model_cost
 from pm.metrics.earthmovers import unit_earthmovers
 from pm.pmmodels.tracefreq import RoleTraceFrequency
-from pm.ssnap.ssnap import sslogFromCSV, sslogWithRanges, mine
+from pm.ssnap.ssnap import mine
 
 logger = logging.getLogger(__name__)
 debug = logger.debug
@@ -24,6 +25,29 @@ logging.basicConfig(level=logging.INFO, format="%(message)s")
 
 vard = 'var'
 
+
+def formatFrozen(fset):
+    outstr = "{" 
+    first = True
+    for entry in fset:
+        if not first:
+            outstr += ","
+        first = False
+        outstr += entry
+    outstr += "}"
+    return outstr
+
+def formatTrace(trace):
+    init = "rt["
+    outstr = init
+    first = True
+    for roles in trace:
+        if not first:
+            outstr += ",\n   "
+        first = False
+        outstr += formatFrozen(roles)
+    outstr += "]"
+    return outstr
 
 
 def checklog(log):
@@ -48,6 +72,31 @@ def checklog(log):
     info( f"    Probability of Secretary: {sec/lsum}")
     info( f"    Probability of Secretary and Magistrate joint role: {sm/lsum}")
     info( f"    Probability of Magistrate only: {mm/lsum}")
+
+
+def listsecmag(log):
+    lsum = 0 ;  zsum = 0
+    secretary = 'Secretary (of Ministry or Board)'
+    magistrate = 'County Magistrate'
+    secmag = frozenset([secretary,magistrate])
+    magtrace = (frozenset([magistrate]),)
+    magtracem = (frozenset(['I']),frozenset([magistrate]),frozenset(['F']) )   
+    sm = 0 ; sec = 0; mm = 0
+    print(f"Joint secretary and magistrates:")
+    for trace in log:
+        # print(f"{formatTrace(trace)} ... {log[trace]}" )
+        lsum += log[trace]
+        if secmag in trace:
+            # print(f"Joint secretary and magistrate:")
+            print(f"{formatTrace(trace)} ... {log[trace]}" )
+            # print(f"{trace} ... {log[trace]}" )
+            sm += log[trace]
+        for ss in trace:
+            if secretary in ss:
+                sec += log[trace]
+        if trace == magtrace or trace == magtracem:
+            mm += log[trace]
+
 
 def sslog_to_summary(sslog):
     result = defaultdict(int)
@@ -155,7 +204,23 @@ def magprob():
     metrics(mgradclip,mclip,"    magistrate palace vs all, model vs model")
 
 
+def magsectrace():
+    info("Palace Grad Magistrates")
+    maggradslogname = 'var/cged-q-jmaggrad.csv'
+    gradtag = 'jmaggrad'
+    info(f"Loading ... {maggradslogname}" )
+    # logfile = os.path.join(vard,maglogname+'.csv')
+    ssgradlogeng = sslogWithRanges(maggradslogname,
+                         caseIdCol='person_id',activityCol='synjob_eng',
+                         timeColStart='start_year',timeColEnd='end_year',
+                         types = {'start_year':float,'end_year':float  },
+                         keepSuccDupes=False)   
+    maggradlog = filterByTimeOnInt(ssgradlogeng, years=15)   
+    lglog = sslog_to_summary(maggradlog)
+    listsecmag(lglog)
+
 
 if __name__ == '__main__':
-    magprob()
+    # magprob()
+    magsectrace()
 
