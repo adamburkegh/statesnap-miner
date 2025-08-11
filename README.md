@@ -21,7 +21,7 @@ The example script, [snapeg.py](snapeg.py), uses a toy CSV log from the unit tes
 
 ```
 $ python snapeg.py
-Output model to test_ssnap1.png.
+Output model to test_ssnap1_pn.png.
 ```
 
 Implementations of the miner and code to work with state snapshot logs are in the `ssnap` module, and can be used as a library.
