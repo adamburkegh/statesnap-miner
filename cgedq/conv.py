@@ -380,7 +380,7 @@ def normalize_events(ds,trans):
     # and even have multiple variants of their name
     info('Officials: {}'.format(officials) )
     appointments = ds[['person_id',jobfield,'date_yyyymm','year', \
-                        'pinji_category']].copy()
+                        'pinji_category',centralfield]].copy()
     appointments.drop_duplicates(inplace=True)
     appointments = normalize_positions_df(appointments,knownroles)
     appointments[jobfield] = appointments[jobfield].replace(role_synonyms)
@@ -661,6 +661,7 @@ def process_public_extract():
     Cut-down version of process() to produce the extract of public data year 
     ranges.
     '''
+    info(f"Started public extract at {datetime.now()}")
     global DATA_DIR 
     DATA_DIR = 'data'
     fin = 'cged-q-ab-20220303.dta'
@@ -693,12 +694,16 @@ def main_parse() -> object:
     parser.add_argument('--tmlfile')
     parser.add_argument('--rebuild',action='store_true',default=False)
     parser.add_argument('--datadir',default='data')
+    parser.add_argument('--publicextract',action='store_true',default=False)
     return parser.parse_args()
 
 def main():
     args = main_parse()
-    process(args.cgedqfile,args.rebuild,args.tmlfile,args.inputtype,
-            args.datadir)
+    if args.publicextract:
+        process_public_extract() 
+    else:
+        process(args.cgedqfile,args.rebuild,args.tmlfile,args.inputtype,
+                args.datadir)
 
 
 if __name__ == "__main__":
