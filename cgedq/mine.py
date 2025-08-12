@@ -152,45 +152,62 @@ def mineByTime(vard,fname,sslog:set,years:int,noise=0.0,font=None,final=True):
     sslogn = filterByTimeOnInt(sslog, years)
     reportLogStats(sslogn, fname+ "_y" + str(years))
     rsn = mine(sslogn,label=fname,noiseThreshold=noise,final=final)
-    #tsum = sum([tran.weight for tran in rsn.transitions])
-    #info(f'Total weights: {tsum} ... weight threshold: {noise*tsum}')
-    #exportNetToScaledImage(vard,
-    #        f"{fname}_n{10000*noise:04.0f}_ss{str(years).zfill(3)}y",pn,sslog,
-    #        font)
     exportRoleStateNetToImage(vard,
             f"{fname}_n{10000*noise:04.0f}_ss{str(years).zfill(3)}y_rsn",rsn,
                               sslog, font)
+
+def minePLPNByTime(vard,fname,sslog:set,years:int,noise=0.0,font=None,
+                   final=True):
+    sslogn = filterByTimeOnInt(sslog, years)
+    reportLogStats(sslogn, fname+ "_y" + str(years))
     plpn = minePLPN(sslogn,label=fname,noiseThreshold=noise,final=False)
     exportNetToScaledImage(vard,
             f"{fname}_n{10000*noise:04.0f}_ss{str(years).zfill(3)}y_plpn",plpn,
                            sslog, font)
 
 
-def mineJobStatesByRange(vard:str,fid:str,noise:float,years:list,final=True):
+def fname_eng(fid):
     fname = f'{trange}-{fid}'
     fnameeng = fname + 'eng'
+    return fnameeng
+
+def mineJobStatesByRange(vard:str,fid:str,noise:float,years:list,final=True):
+    fname = f'{trange}-{fid}'
+    fnameeng = fname_eng(fid)
+    sslog = sslog_extract_cn(vard,fid)
+    reportLogStats(sslog,fname+'_ss')
+    sslogeng = sslog_extract_eng(vard,fid)
+    info("Mining states ..." )
+    for year in years:
+        mineByTime(vard,fname,sslog,year,noise,final=final)
+        mineByTime(vard,fnameeng,sslogeng,year,noise,font=ENGFONT,final=final)
+ 
+
+def sslog_extract(vard,fid,activityCol):
+    fname = f'{trange}-{fid}'
     info("Loading ..." + fname )
     logfile = os.path.join(vard,fname+'.csv')
     oname = fname + '_ss'
     sslog = sslogWithRanges(logfile,
-                         caseIdCol='person_id',activityCol='synjob',
+                         caseIdCol='person_id',activityCol=activityCol,
                          timeColStart='start_year',timeColEnd='end_year',
                          types = {'start_year':float,'end_year':float  },
                          keepSuccDupes=False)
-    reportLogStats(sslog,oname)
-    sslogeng = sslogWithRanges(logfile,
-                         caseIdCol='person_id',activityCol='synjob_eng',
-                         timeColStart='start_year',timeColEnd='end_year',
-                         types = {'start_year':float,'end_year':float  },
-                         keepSuccDupes=False)
-    info("Mining states ..." )
-    for year in years:
-        mineByTime(vard,fnameeng,sslogeng,year,noise,font=ENGFONT,final=final)
-        mineByTime(vard,fname,sslog,year,noise,final=final)
-    
+    return sslog
+
+
+def sslog_extract_cn(vard,fid):
+    return sslog_extract(vard,fid,'synjob')
+
+
+def sslog_extract_eng(vard,fid):
+    return sslog_extract(vard,fid,'synjob_eng')
+
 
 def mineJobStates(vard:str,fid:str,noise=0.0):
-    mineJobStatesByRange(vard,fid,noise,[2,3,5])
+    mineJobStatesByRange(vard,fid,noise,[2,3])
+
+
 
 
 def mineJobStatesFullOnly(vard,fid):
@@ -211,43 +228,29 @@ def mineJobStatesFullOnly(vard,fid):
 
 
 def main():
-    # mineByRegion('var')
-    # mineRegionTransitions('var')
     if len(sys.argv) > 1:
         trange = sys.argv[1]
-    # mineJobs('var','tophanlin')
-    # mineJobs('var','topjinshi')
-    # mineJobs('var','toptoppers')
-    # mineJobs('var','toptoppersinit')
-    # mineJobs('var','toppersnoguards')
-    # mineJobs('var','toptoppersnoguards')
-    # mineJobs('var','toppers')
-    # mineJobs('var','topguards')
-    # mineJobs('var','guards')
-    # mineJobs('var','topzynoguardsn20')
-    # mineJobStates('var','topzynoguardsn20')
-    # mineJobStates('var','topzynoguardsn50')
-    # mineJobStates('var','topzynoguardsnall')
-    # mineJobStates('var','topnoguardsn20')
-    # mineJobStates('var','topnoguardsnall')
-    # mineJobStates('var','bynoguardsnall')
-    # mineJobStates('var','thnoguardsnall')
+    info(f"Started {datetime.now()}")
     mineJobStates('var','zyjtnall')
     # mineJobStates('var','byjtall')
     # mineJobStates('var','thjtnall')
-    mineJobStates('var','t1jtall')
+    # mineJobStates('var','t1jtall') # blows reachability stack
+    mineJobStates('var','t1jtall', 0.0008) 
     # mineJobStates('var','t2jtall') too many states
     # mineJobStates('var','topt2jtn05') 
     # mineJobStates('var','topt2jtn05',0.0005) 
     #mineJobStates('var','topt2jtn10',0.0005) 
-    mineJobStates('var','topt12jtn07',0.0008) 
+    sslogeng = sslog_extract_eng('var','topt12jtn07')
+    fnameeng = fname_eng('topt12jtn07')
+    minePLPNByTime('var',fnameeng,sslogeng,years=5,noise=0.008,
+                   font=ENGFONT,final=True)
     #mineJobStates('var','topt2jtn10') # already hard to read
     #mineJobStates('var','test2')
     # mineJobStates('var','zypurple')
     # mineJobStates('var','topjinshi')
     # mineJobStatesFullOnly('var','zypurple')
     # mineJobStatesFullOnly('var','178610052600')
-    info("Done")
+    info(f"Done {datetime.now()}")
 
 
 if __name__ == '__main__':
