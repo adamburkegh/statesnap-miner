@@ -1,6 +1,6 @@
 # statesnap-miner
 
-The State Snapshot Miner constructs Petri net models from role trace logs. This has been applied to data from the [CGED-Q](https://shss.hkust.edu.hk/lee-campbell-group/projects/china-government-employee-database-qing-cged-q/), a digital version of Qing civil service records. A paper on this research was [presented at ICPM2023](https://adamburkeware.net/2023/09/10/state-snap.html).
+The State Snapshot Miner constructs Petri net models from role trace logs. This has been applied to data from the [CGED-Q](https://shss.hkust.edu.hk/lee-campbell-group/projects/china-government-employee-database-qing-cged-q/), a digital version of Qing civil service records. A paper on this research was [presented at ICPM2023](https://adamburkeware.net/2023/09/10/state-snap.html). Research is ongoing and future publications are planned.
 
 ## Running
 
@@ -51,7 +51,7 @@ Some example extracts of the [CGED-Q public data release 1850-1864](https://shss
 
 ### Mine
 
-[mine.py](cgedq/mine.py) takes snapshot CSV files, performs further filtering, runs the state snapshot miner on them, producing PNG output. Output can be varied to eg PNML or PDF by changing the script. 
+[mine.py](cgedq/mine.py) takes snapshot CSV files, performs further filtering, and runs the state snapshot miner on them, producing PNG output. Output can be varied to eg PNML (for PLPN) or PDF by changing the script. 
 
 `python -m cgedq.mine`
 
