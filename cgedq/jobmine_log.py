@@ -1,5 +1,7 @@
 
 import logging
+from logging import info
+from datetime import datetime
 import os
 import sys
 from cgedq.mine import filterByTimeOnInt, mineByTime, mineJobStatesByRange
@@ -104,11 +106,20 @@ def maggrad():
     mineJobStatesByRange('var',tag,noise=0.002,years=[15])
 
 
+def mag_blow_stack_test():
+    tag = 'jmagfull' # sys.argv[1]
+    # noise = 0.0002 # blows stack in v0.10.0
+    noise = 0.0003   # 
+    mineJobStatesByRange('var',tag,noise,years=[15])
+
 if __name__ == '__main__':
+    info(f"Start {datetime.now()}")
     mag()
     # maggrad()
     # magtails()
     # magintendant()
     # magintendanttop()
+    # mag_blow_stack_test()
+    info(f"Finished {datetime.now()}")
 
 

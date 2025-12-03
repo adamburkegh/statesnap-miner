@@ -8,9 +8,8 @@ import os.path
 import shutil
 import subprocess
 import tempfile
-from logging import info
+from logging import info, warning
 from typing import Dict
-from warnings import warn
 
 from pmkoalas.models.petrinet import LabelledPetriNet,Place
 
@@ -97,13 +96,13 @@ def lpn_prettier_dot(lpn:LabelledPetriNet):
             if a.from_node.nodeId in nodeIds:
                 dotNode_from = nodeIds[a.from_node.nodeId]
             else:
-                warn(f"Node {a.from_node} not found in nodeIds, likely something is wrong with the given LPN")
+                warning(f"Node {a.from_node} not found in nodeIds, likely something is wrong with the given LPN")
                 dotNode_from = f"n{nid}"
                 nid += 1
             if a.to_node.nodeId in nodeIds:
                 dotNode_to = nodeIds[a.to_node.nodeId]
             else:
-                warn(f"Node {a.to_node} not found in nodeIds, likely something is wrong with the given LPN")
+                warning(f"Node {a.to_node} not found in nodeIds, likely something is wrong with the given LPN")
                 dotNode_to = f"n{nid}"
                 nid += 1
             ret += f"\t{dotNode_from} -> {dotNode_to}[arrowhead=normal,color=\"{ARC_COLOUR}\"];\n"

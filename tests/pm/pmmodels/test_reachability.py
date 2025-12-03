@@ -55,6 +55,7 @@ class ReachabilityTest(unittest.TestCase):
         self.assertEqual( [ ('ATest',1,4), ('BTest',2,1) ],
                       sort_place_tuple_seq(( (Place(pid=2,name='BTest'),1),
                                             (Place(pid=1,name='ATest'),4) ) ) ) 
+
     def test_assert_markings_equal(self):
         self.assertMarkingsEqual(
                 {((Place("Drone",pid="3"), 1), 
@@ -185,7 +186,7 @@ if __name__ == '__main__':
     for part in __name__.split('.')[1:]:
         module = getattr(module, part)
     loader = unittest.defaultTestLoader
-    loader.testMethodPrefix = 'test_triple_marking'
+    loader.testMethodPrefix = 'test_simple_sequence'
     tests = loader.loadTestsFromModule( module )
     tr.run( tests )
 
