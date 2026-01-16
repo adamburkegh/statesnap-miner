@@ -81,10 +81,14 @@ Records for 1850-1864 are in the `data` directory. These extracts include only a
 
 If using the data beyond preliminary investigatory work, please do reach out to the experts at the Lee-Campbell group, and of course cite their work. 
 
-### References
-Burke, A.T., Leemans, S.J.J, Wynn, M.T., and Campbell, C.D. (2023). State Snapshot Process Discovery on Career Paths of Qing Dynasty Civil Servants. ICPM2023.
+## CGED-Q Conceptual Model
 
-Burke, A.T., Leemans, S.J.J, Hou, Y., Wynn, M.T., and Campbell, C.D. (forthcoming). State-Based Career Path Discovery and Comparison
+Analysis of this rich data set included the preparation of a [conceptual model in ORM notation](<images/CGED-Q ORM 202506.pdf>).
+
+### References
+Burke, A.T., Leemans, S.J.J., Wynn, M.T., and Campbell, C.D. (2023). State Snapshot Process Discovery on Career Paths of Qing Dynasty Civil Servants. ICPM2023.
+
+Burke, A.T., Leemans, S.J.J., Hou, Y., Wynn, M.T., and Campbell, C.D. (forthcoming). State-Based Career Path Discovery and Comparison
 For Qing Civil Servants 1830-1904
 
 Chen, B., Campbell, C., Ren, Y., & Lee, J. (2020). Big Data for the Study of Qing Officialdom: The China Government Employee Database-Qing (CGED-Q). Journal of Chinese History, 4(2), 431–460. https://doi.org/10.1017/jch.2020.15
