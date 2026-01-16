@@ -1,6 +1,6 @@
-# statesnap-miner
+# statesnap-miner and role-state-miner
 
-The State Snapshot Miner constructs Petri net models from role trace logs. This has been applied to data from the [CGED-Q](https://shss.hkust.edu.hk/lee-campbell-group/projects/china-government-employee-database-qing-cged-q/), a digital version of Qing civil service records. A paper on this research was [presented at ICPM2023](https://adamburkeware.net/2023/09/10/state-snap.html). Research is ongoing and future publications are planned.
+The State Snapshot Miner and Role-State Miners construct Petri net models from role trace logs. This has been applied to data from the [CGED-Q](https://shss.hkust.edu.hk/lee-campbell-group/projects/china-government-employee-database-qing-cged-q/), a digital version of Qing civil service records. A paper on this research was [presented at ICPM2023](https://adamburkeware.net/2023/09/10/state-snap.html). Research is ongoing and future publications are planned.
 
 ## Running
 
@@ -82,7 +82,10 @@ Records for 1850-1864 are in the `data` directory. These extracts include only a
 If using the data beyond preliminary investigatory work, please do reach out to the experts at the Lee-Campbell group, and of course cite their work. 
 
 ### References
-Burke, A., Leemans, S.J.J, Wynn, M.T., and Campbell, C.D. (2023). State Snapshot Process Discovery on Career Paths of Qing Dynasty Civil Servants. ICPM2023.
+Burke, A.T., Leemans, S.J.J, Wynn, M.T., and Campbell, C.D. (2023). State Snapshot Process Discovery on Career Paths of Qing Dynasty Civil Servants. ICPM2023.
+
+Burke, A.T., Leemans, S.J.J, Hou, Y., Wynn, M.T., and Campbell, C.D. (forthcoming). State-Based Career Path Discovery and Comparison
+For Qing Civil Servants 1830-1904
 
 Chen, B., Campbell, C., Ren, Y., & Lee, J. (2020). Big Data for the Study of Qing Officialdom: The China Government Employee Database-Qing (CGED-Q). Journal of Chinese History, 4(2), 431–460. https://doi.org/10.1017/jch.2020.15
 
