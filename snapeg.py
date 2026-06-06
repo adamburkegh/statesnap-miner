@@ -1,3 +1,8 @@
+'''
+Example usage of the Role-State miner on a small log in CSV format.
+'''
+
+
 import pm.ssnap.ssnap as snapminer
 from pm.pmmodels.pnformatter import exportNetToScaledImage
 
